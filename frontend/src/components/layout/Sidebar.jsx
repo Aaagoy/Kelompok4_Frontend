@@ -75,7 +75,7 @@ export default function Sidebar() {
               pathname.startsWith(`${item.href}/`);
 
             return (
-              <Link key={item.href} href={item.href} onClick={() => setIsOpen(false)} className={`flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200 ${isActive
+              <Link key={item.href} to={item.href} onClick={() => setIsOpen(false)} className={`flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-all duration-200 ${isActive
                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
                 : "text-slate-300 hover:bg-white/10 hover:text-white"
               }`}>
