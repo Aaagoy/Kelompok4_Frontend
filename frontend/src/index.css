@@ -1,4 +1,10 @@
 @import "tailwindcss";
+html,body {
+  margin: 0;
+  padding: 0;
+  font-family: "Geist", sans-serif;
+}
+
 @plugin "daisyui" {
   themes: light --default;
 }
