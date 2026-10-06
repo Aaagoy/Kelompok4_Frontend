@@ -1,37 +1,52 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
-import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
+// import React, { useState } from 'react';
+import DashboardLayout from "../../components/DashboardLayout";
+import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([
-    { id: 1, name: 'Admin', email: 'admin@harafina.com', role: 'Admin' },
-    { id: 2, name: 'Hendra Wijaya', email: 'owner@harafina.com', role: 'Owner' },
-    { id: 3, name: 'Rudi Hartono', email: 'rudi@harafina.com', role: 'Pelanggan' },
+    { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
+    {
+      id: 2,
+      name: "Hendra Wijaya",
+      email: "owner@harafina.com",
+      role: "Owner",
+    },
+    {
+      id: 3,
+      name: "Rudi Hartono",
+      email: "rudi@harafina.com",
+      role: "Pelanggan",
+    },
   ]);
 
-  const [activeTab, setActiveTab] = useState('Semua');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Admin' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "Admin",
+  });
 
   // Fungsi untuk menentukan warna badge berdasarkan role
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case 'Admin':
-        return 'bg-blue-100 text-blue-600';
-      case 'Owner':
-        return 'bg-purple-100 text-purple-600';
-      case 'Pelanggan':
-        return 'bg-emerald-100 text-emerald-600';
+      case "Admin":
+        return "bg-blue-100 text-blue-600";
+      case "Owner":
+        return "bg-purple-100 text-purple-600";
+      case "Pelanggan":
+        return "bg-emerald-100 text-emerald-600";
       default:
-        return 'bg-gray-100 text-gray-600';
+        return "bg-gray-100 text-gray-600";
     }
   };
 
   const filteredUsers = users.filter((u) => {
-    const matchesTab = activeTab === 'Semua' ? true : u.role === activeTab;
-    const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
+    const matchesSearch =
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -40,13 +55,13 @@ export default function UserManagement() {
     if (!formData.name || !formData.email) return;
 
     setUsers([...users, { id: Date.now(), ...formData }]);
-    setFormData({ name: '', email: '', role: 'Admin' });
+    setFormData({ name: "", email: "", role: "Admin" });
     setIsModalOpen(false);
   };
 
   const handleDelete = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-      setUsers(users.filter(u => u.id !== id));
+    if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
+      setUsers(users.filter((u) => u.id !== id));
     }
   };
 
@@ -55,10 +70,12 @@ export default function UserManagement() {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Manajemen User</h2>
-          <p className="text-xs text-gray-400 mt-1">Kelola data pengguna, hak akses, dan status akun sistem.</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Kelola data pengguna, hak akses, dan status akun sistem.
+          </p>
         </div>
 
-        <button 
+        <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md transition-colors"
         >
@@ -69,7 +86,10 @@ export default function UserManagement() {
 
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="relative w-full md:w-80">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari nama atau email..."
@@ -80,14 +100,14 @@ export default function UserManagement() {
         </div>
 
         <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto">
-          {['Semua', 'Admin', 'Owner', 'Pelanggan'].map((tab) => (
+          {["Semua", "Admin", "Owner", "Pelanggan"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === tab
-                  ? 'bg-[#8D5B3A] text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-800'
+                  ? "bg-[#8D5B3A] text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               {tab}
@@ -120,7 +140,9 @@ export default function UserManagement() {
                   </td>
                   <td className="py-4 px-6 text-gray-500">{user.email}</td>
                   <td className="py-4 px-6">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}
+                    >
                       {user.role}
                     </span>
                   </td>
@@ -129,7 +151,10 @@ export default function UserManagement() {
                       <button className="p-1.5 text-gray-500 hover:text-blue-600">
                         <Pencil size={15} />
                       </button>
-                      <button onClick={() => handleDelete(user.id)} className="p-1.5 text-rose-500 hover:text-rose-700">
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="p-1.5 text-rose-500 hover:text-rose-700"
+                      >
                         <Trash2 size={15} />
                       </button>
                     </div>
@@ -146,36 +171,50 @@ export default function UserManagement() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-800">Tambah User Baru</h3>
-              <button onClick={() => setIsModalOpen(false)}><X size={18} /></button>
+              <button onClick={() => setIsModalOpen(false)}>
+                <X size={18} />
+              </button>
             </div>
             <form onSubmit={handleAddUser} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-gray-600 mb-1">NAMA LENGKAP</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  NAMA LENGKAP
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: Budi Santoso"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-xl"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold text-gray-600 mb-1">EMAIL</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  EMAIL
+                </label>
                 <input
                   type="email"
                   placeholder="Contoh: budi@harafina.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-xl"
                   required
                 />
               </div>
               <div>
-                <label className="block font-bold text-gray-600 mb-1">ROLE</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  ROLE
+                </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
                   className="w-full px-3 py-2 border rounded-xl bg-white"
                 >
                   <option value="Admin">Admin</option>
@@ -184,8 +223,19 @@ export default function UserManagement() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 border rounded-xl">Batal</button>
-                <button type="submit" className="px-4 py-2 bg-[#8D5B3A] text-white rounded-xl">Simpan User</button>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 border rounded-xl"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#8D5B3A] text-white rounded-xl"
+                >
+                  Simpan User
+                </button>
               </div>
             </form>
           </div>
