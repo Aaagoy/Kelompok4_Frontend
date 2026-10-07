@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
 import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
+=======
+import React, { useState } from 'react';
+import DashboardLayout from '../../components/DashboardLayout'; // Sesuaikan path jika berbeda folder
+import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
 
 export default function UserManagement() {
   const [users, setUsers] = useState([
@@ -43,10 +49,16 @@ export default function UserManagement() {
   };
 
   const filteredUsers = users.filter((u) => {
+<<<<<<< HEAD
     const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
     const matchesSearch =
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       u.email.toLowerCase().includes(searchQuery.toLowerCase());
+=======
+    const matchesTab = activeTab === 'Semua' ? true : u.role === activeTab;
+    const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
     return matchesTab && matchesSearch;
   });
 
@@ -60,13 +72,19 @@ export default function UserManagement() {
   };
 
   const handleDelete = (id) => {
+<<<<<<< HEAD
     if (confirm("Apakah Anda yakin ingin menghapus user ini?")) {
       setUsers(users.filter((u) => u.id !== id));
+=======
+    if (window.confirm('Apakah Anda yakin ingin menghapus user ini?')) {
+      setUsers(users.filter(u => u.id !== id));
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
     }
   };
 
   return (
     <DashboardLayout>
+      {/* Header Halaman */}
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Manajemen User</h2>
@@ -84,7 +102,8 @@ export default function UserManagement() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      {/* Filter & Search Bar */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
         <div className="relative w-full md:w-80">
           <Search
             size={16}
@@ -104,7 +123,7 @@ export default function UserManagement() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === tab
                   ? "bg-[#8D5B3A] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-800"
@@ -116,6 +135,7 @@ export default function UserManagement() {
         </div>
       </div>
 
+      {/* Tabel User */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
@@ -129,6 +149,7 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
+<<<<<<< HEAD
               {filteredUsers.map((user, index) => (
                 <tr key={user.id} className="hover:bg-gray-50/50">
                   <td className="py-4 px-6 text-gray-400">{index + 1}</td>
@@ -158,20 +179,62 @@ export default function UserManagement() {
                         <Trash2 size={15} />
                       </button>
                     </div>
+=======
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => (
+                  <tr key={user.id} className="hover:bg-gray-50/50">
+                    <td className="py-4 px-6 text-gray-400">{index + 1}</td>
+                    <td className="py-4 px-6 font-semibold">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                          <User size={16} />
+                        </div>
+                        <span>{user.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-gray-500">{user.email}</td>
+                    <td className="py-4 px-6">
+                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      <div className="flex justify-center items-center gap-2">
+                        <button className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors">
+                          <Pencil size={15} />
+                        </button>
+                        <button onClick={() => handleDelete(user.id)} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="py-6 text-center text-gray-400">
+                    Tidak ada data user yang ditemukan.
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
+      {/* Modal Tambah User */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
+<<<<<<< HEAD
               <h3 className="font-bold text-gray-800">Tambah User Baru</h3>
               <button onClick={() => setIsModalOpen(false)}>
+=======
+              <h3 className="font-bold text-gray-800 text-sm">Tambah User Baru</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                 <X size={18} />
               </button>
             </div>
@@ -184,10 +247,15 @@ export default function UserManagement() {
                   type="text"
                   placeholder="Contoh: Budi Santoso"
                   value={formData.name}
+<<<<<<< HEAD
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="w-full px-3 py-2 border rounded-xl"
+=======
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                   required
                 />
               </div>
@@ -199,10 +267,15 @@ export default function UserManagement() {
                   type="email"
                   placeholder="Contoh: budi@harafina.com"
                   value={formData.email}
+<<<<<<< HEAD
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
                   className="w-full px-3 py-2 border rounded-xl"
+=======
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                   required
                 />
               </div>
@@ -212,10 +285,15 @@ export default function UserManagement() {
                 </label>
                 <select
                   value={formData.role}
+<<<<<<< HEAD
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
                   }
                   className="w-full px-3 py-2 border rounded-xl bg-white"
+=======
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#8D5B3A]"
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                 >
                   <option value="Admin">Admin</option>
                   <option value="Owner">Owner</option>
@@ -223,6 +301,7 @@ export default function UserManagement() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
+<<<<<<< HEAD
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -233,6 +312,18 @@ export default function UserManagement() {
                 <button
                   type="submit"
                   className="px-4 py-2 bg-[#8D5B3A] text-white rounded-xl"
+=======
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)} 
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors"
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
                 >
                   Simpan User
                 </button>

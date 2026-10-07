@@ -5,8 +5,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 // Halaman Admin
+<<<<<<< HEAD
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement"; // Import komponen UserManagement
+=======
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement'; // Import komponen UserManagement
+import ProductManagement from './pages/admin/ProductManagement';
+>>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
 
 export default function App() {
   return (
@@ -21,6 +27,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/produk" element={<ProductManagement />} />
         </Route>
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />
