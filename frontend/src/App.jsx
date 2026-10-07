@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // import Dashboard from "./pages/Dashboard.jsx";
-import ProtectedRoute from "./components/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute";
 // Halaman Publik & Auth
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -19,11 +19,11 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         {/* Rute Terproteksi Khusus Admin */}
-        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/dashboard" element={<AdminDashboard />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/produk" element={<ProductManagement />} />
-        </Route>
+        {/* <Route element={<ProtectedRoute allowedRoles={["admin"]} />}> */}
+        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/users" element={<UserManagement />} />
+        <Route path="/produk" element={<ProductManagement />} />
+        {/* </Route> */}
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

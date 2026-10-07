@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout'; // Sesuaikan path jika berbeda folder
-import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
+import { useState } from "react";
+import DashboardLayout from "../../components/DashboardLayout"; // Sesuaikan path jika berbeda folder
+import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
   const [users, setUsers] = useState([
@@ -43,9 +43,10 @@ export default function UserManagement() {
   };
 
   const filteredUsers = users.filter((u) => {
-    const matchesTab = activeTab === 'Semua' ? true : u.role === activeTab;
-    const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
+    const matchesSearch =
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -59,8 +60,8 @@ export default function UserManagement() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-      setUsers(users.filter(u => u.id !== id));
+    if (window.confirm("Apakah Anda yakin ingin menghapus user ini?")) {
+      setUsers(users.filter((u) => u.id !== id));
     }
   };
 
@@ -145,7 +146,9 @@ export default function UserManagement() {
                     </td>
                     <td className="py-4 px-6 text-gray-500">{user.email}</td>
                     <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}
+                      >
                         {user.role}
                       </span>
                     </td>
@@ -154,7 +157,10 @@ export default function UserManagement() {
                         <button className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors">
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => handleDelete(user.id)} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors">
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors"
+                        >
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -178,8 +184,13 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-gray-800 text-sm">Tambah User Baru</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="font-bold text-gray-800 text-sm">
+                Tambah User Baru
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -192,7 +203,9 @@ export default function UserManagement() {
                   type="text"
                   placeholder="Contoh: Budi Santoso"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
                   required
                 />
@@ -205,7 +218,9 @@ export default function UserManagement() {
                   type="email"
                   placeholder="Contoh: budi@harafina.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
                   required
                 />
@@ -216,7 +231,9 @@ export default function UserManagement() {
                 </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#8D5B3A]"
                 >
                   <option value="Admin">Admin</option>
@@ -225,15 +242,15 @@ export default function UserManagement() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)} 
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
                 >
                   Batal
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors"
                 >
                   Simpan User

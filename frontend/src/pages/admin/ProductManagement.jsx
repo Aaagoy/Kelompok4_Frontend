@@ -193,9 +193,6 @@ export default function ProductManagement() {
                           <p className="font-semibold text-slate-900">
                             {item.nama}
                           </p>
-                          <p className="text-xs text-slate-400">
-                            ID: #{item.id}
-                          </p>
                         </div>
                       </div>
                     </td>
