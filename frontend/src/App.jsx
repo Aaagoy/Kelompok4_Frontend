@@ -10,6 +10,7 @@ import Login from './pages/Login';
 // Halaman Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement'; // Import komponen UserManagement
+import ProductManagement from './pages/admin/ProductManagement';
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
+          <Route path="/produk" element={<ProductManagement />} />
         </Route>
 
         {/* Fallback jika URL tidak ditemukan */}
