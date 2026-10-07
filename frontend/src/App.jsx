@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         {/* Rute Terproteksi Khusus Admin */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
         </Route>
         {/* Fallback jika URL tidak ditemukan */}
