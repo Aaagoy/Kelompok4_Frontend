@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-// import React from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Search, 
-  Eye, 
-  DollarSign, 
-  ShoppingBag, 
-  UserCheck 
-=======
 import React from 'react';
 import DashboardLayout from '../../components/DashboardLayout'; // Sesuaikan path folder jika berbeda
 import {
@@ -20,7 +8,6 @@ import {
   DollarSign,
   ShoppingBag,
   UserCheck
->>>>>>> 771f5ea50225c17eca4ab6dadca461d43690546a
 } from 'lucide-react';
 
 export default function AdminDashboard() {
