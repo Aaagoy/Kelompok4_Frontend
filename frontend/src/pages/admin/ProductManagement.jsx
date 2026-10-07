@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout"; // Sesuaikan path folder jika berbeda
 import {
@@ -12,21 +11,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-=======
-import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout'; 
-import { 
-  Package, 
-  ShoppingCart, 
-  History, 
-  Users, 
-  Plus, 
-  Search, 
-  Edit3, 
-  Trash2, 
-  X 
-} from 'lucide-react';
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
 
 export default function ProductManagement() {
   // Ambil data awal dari localStorage jika ada, jika tidak pakai data dummy
@@ -38,30 +22,6 @@ export default function ProductManagement() {
     return [
       {
         id: 1,
-<<<<<<< HEAD
-        nama: "Gula Semut Organik",
-        kategori: "Pemanis & Gula",
-        harga: 25000,
-        stok: 45,
-        image: "https://via.placeholder.com/50",
-      },
-      {
-        id: 2,
-        nama: "Tepung Super Brand",
-        kategori: "Tepung & Biji-bijian",
-        harga: 15000,
-        stok: 8,
-        image: "https://via.placeholder.com/50",
-      },
-      {
-        id: 3,
-        nama: "Ragi Fermipan Instan",
-        kategori: "Bahan Roti & Kue",
-        harga: 7500,
-        stok: 0,
-        image: "https://via.placeholder.com/50",
-      },
-=======
         sku: 'SKU-001',
         nama: 'Gula Semut Organik',
         kategori: 'Pemanis & Gula',
@@ -90,7 +50,6 @@ export default function ProductManagement() {
         deskripsi: 'Ragi instan aktif untuk mengembangkan adonan roti dengan cepat.',
         image: 'https://via.placeholder.com/50'
       }
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
     ];
   });
 
@@ -104,19 +63,12 @@ export default function ProductManagement() {
 
   // Form State untuk Tambah Produk
   const [formData, setFormData] = useState({
-<<<<<<< HEAD
-    nama: "",
-    kategori: "",
-    harga: "",
-    stok: "",
-=======
     sku: '',
     nama: '',
     kategori: '',
     harga: '',
     stok: '',
     deskripsi: '',
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   });
 
   // Fungsi Badge Status berdasarkan stok
@@ -143,17 +95,10 @@ export default function ProductManagement() {
   };
 
   // Filter Search
-<<<<<<< HEAD
-  const filteredProducts = products.filter(
-    (item) =>
-      item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.kategori.toLowerCase().includes(searchTerm.toLowerCase()),
-=======
   const filteredProducts = products.filter(item =>
     item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.kategori.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.sku.toLowerCase().includes(searchTerm.toLowerCase())
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   );
 
   // Handle Submit Form
@@ -162,31 +107,19 @@ export default function ProductManagement() {
     if (!formData.nama || !formData.kategori) return;
 
     const newProduct = {
-<<<<<<< HEAD
-      id: products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1,
-=======
       id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
       sku: formData.sku || `SKU-00${products.length + 1}`,
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
       nama: formData.nama,
       kategori: formData.kategori,
       harga: Number(formData.harga) || 0,
       stok: Number(formData.stok) || 0,
-<<<<<<< HEAD
-      image: "https://via.placeholder.com/50",
-=======
       deskripsi: formData.deskripsi,
       image: 'https://via.placeholder.com/50'
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
     };
 
     setProducts([...products, newProduct]);
     setIsModalOpen(false);
-<<<<<<< HEAD
-    setFormData({ nama: "", kategori: "", harga: "", stok: "" });
-=======
     setFormData({ sku: '', nama: '', kategori: '', harga: '', stok: '', deskripsi: '' });
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   };
 
   // Delete Handler
@@ -201,17 +134,8 @@ export default function ProductManagement() {
       {/* Header Halaman */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-<<<<<<< HEAD
-          <h1 className="text-2xl font-bold text-slate-900">
-            Manajemen Produk
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Kelola daftar produk, harga, dan ketersediaan stok admin.
-          </p>
-=======
           <h1 className="text-2xl font-bold text-slate-900">Manajemen Produk</h1>
           <p className="text-sm text-slate-500 mt-1">Kelola daftar produk, SKU, harga, dan ketersediaan stok admin.</p>
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -273,17 +197,6 @@ export default function ProductManagement() {
                           className="w-10 h-10 rounded-lg object-cover bg-slate-100 border"
                         />
                         <div>
-<<<<<<< HEAD
-                          <p className="font-semibold text-slate-900">
-                            {item.nama}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-slate-600">
-                      {item.kategori}
-                    </td>
-=======
                           <p className="font-semibold text-slate-900">{item.nama}</p>
                           <p className="text-xs text-slate-400 line-clamp-1">{item.deskripsi || 'Tidak ada deskripsi'}</p>
                         </div>
@@ -291,7 +204,6 @@ export default function ProductManagement() {
                     </td>
                     <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-600">{item.sku}</td>
                     <td className="py-4 px-4 text-slate-600">{item.kategori}</td>
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
                     <td className="py-4 px-4 font-medium text-slate-900">
                       Rp {item.harga.toLocaleString("id-ID")}
                     </td>
