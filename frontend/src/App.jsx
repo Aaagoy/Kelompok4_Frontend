@@ -14,12 +14,12 @@ export default function App() {
       <Routes>
         {/* Rute Publik */}
         {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         {/* Rute Terproteksi Khusus Admin */}
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
         </Route>
         {/* Fallback jika URL tidak ditemukan */}

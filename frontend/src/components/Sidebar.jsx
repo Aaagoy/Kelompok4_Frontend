@@ -1,26 +1,26 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Package, 
-  Grid, 
-  Calculator, 
-  History, 
-  Users 
-} from 'lucide-react';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  FileText,
+  Package,
+  Grid,
+  Calculator,
+  History,
+  Users,
+} from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'Transaksi', path: '/admin/transaksi', icon: FileText },
-    { name: 'Produk', path: '/admin/produk', icon: Package },
-    { name: 'Kategori', path: '/admin/kategori', icon: Grid },
-    { name: 'Kasir', path: '/admin/kasir', icon: Calculator },
-    { name: 'Riwayat', path: '/admin/riwayat', icon: History },
-    { name: 'User', path: '/admin/user', icon: Users },
+    { name: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+    { name: "Transaksi", path: "/admin/transaksi", icon: FileText },
+    { name: "Produk", path: "/admin/produk", icon: Package },
+    { name: "Kategori", path: "/admin/kategori", icon: Grid },
+    { name: "Kasir", path: "/admin/kasir", icon: Calculator },
+    { name: "Riwayat", path: "/admin/riwayat", icon: History },
+    { name: "User", path: "/admin/user", icon: Users },
   ];
 
   return (
@@ -30,7 +30,9 @@ const Sidebar = () => {
         <div className="w-20 h-20 rounded-full bg-[#FAF8F5] border-2 border-amber-200/20 p-2 flex items-center justify-center shadow-inner mb-2">
           <div className="text-center">
             <span className="text-xl">🧑‍🍳</span>
-            <p className="text-[10px] font-bold text-[#3E2723] uppercase tracking-tighter leading-none mt-1">Harafina</p>
+            <p className="text-[10px] font-bold text-[#3E2723] uppercase tracking-tighter leading-none mt-1">
+              Harafina
+            </p>
           </div>
         </div>
       </div>
@@ -47,8 +49,8 @@ const Sidebar = () => {
               to={item.path}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-[#8D5B28] text-white shadow-md font-semibold'
-                  : 'hover:bg-white/5 hover:text-white'
+                  ? "bg-[#8D5B28] text-white shadow-md font-semibold"
+                  : "hover:bg-white/5 hover:text-white"
               }`}
             >
               <Icon className="w-5 h-5" />
