@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout'; // Sesuaikan path folder jika berbeda
+import DashboardLayout from '../../components/DashboardLayout'; 
 import { 
   Package, 
   ShoppingCart, 
@@ -22,26 +22,32 @@ export default function ProductManagement() {
     return [
       {
         id: 1,
+        sku: 'SKU-001',
         nama: 'Gula Semut Organik',
         kategori: 'Pemanis & Gula',
         harga: 25000,
         stok: 45,
+        deskripsi: 'Gula semut murni berkualitas tinggi dari nira kelapa pilihan.',
         image: 'https://via.placeholder.com/50'
       },
       {
         id: 2,
+        sku: 'SKU-002',
         nama: 'Tepung Super Brand',
         kategori: 'Tepung & Biji-bijian',
         harga: 15000,
         stok: 8,
+        deskripsi: 'Tepung terigu protein sedang cocok untuk aneka kue.',
         image: 'https://via.placeholder.com/50'
       },
       {
         id: 3,
+        sku: 'SKU-003',
         nama: 'Ragi Fermipan Instan',
         kategori: 'Bahan Roti & Kue',
         harga: 7500,
         stok: 0,
+        deskripsi: 'Ragi instan aktif untuk mengembangkan adonan roti dengan cepat.',
         image: 'https://via.placeholder.com/50'
       }
     ];
@@ -57,10 +63,12 @@ export default function ProductManagement() {
 
   // Form State untuk Tambah Produk
   const [formData, setFormData] = useState({
+    sku: '',
     nama: '',
     kategori: '',
     harga: '',
-    stok: ''
+    stok: '',
+    deskripsi: '',
   });
 
   // Fungsi Badge Status berdasarkan stok
@@ -77,7 +85,8 @@ export default function ProductManagement() {
   // Filter Search
   const filteredProducts = products.filter(item =>
     item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.kategori.toLowerCase().includes(searchTerm.toLowerCase())
+    item.kategori.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle Submit Form
@@ -87,16 +96,18 @@ export default function ProductManagement() {
 
     const newProduct = {
       id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
+      sku: formData.sku || `SKU-00${products.length + 1}`,
       nama: formData.nama,
       kategori: formData.kategori,
       harga: Number(formData.harga) || 0,
       stok: Number(formData.stok) || 0,
+      deskripsi: formData.deskripsi,
       image: 'https://via.placeholder.com/50'
     };
 
     setProducts([...products, newProduct]);
     setIsModalOpen(false);
-    setFormData({ nama: '', kategori: '', harga: '', stok: '' });
+    setFormData({ sku: '', nama: '', kategori: '', harga: '', stok: '', deskripsi: '' });
   };
 
   // Delete Handler
@@ -112,7 +123,7 @@ export default function ProductManagement() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Manajemen Produk</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola daftar produk, harga, dan ketersediaan stok admin.</p>
+          <p className="text-sm text-slate-500 mt-1">Kelola daftar produk, SKU, harga, dan ketersediaan stok admin.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
@@ -124,14 +135,14 @@ export default function ProductManagement() {
       </div>
 
       {/* Card Content Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/85 overflow-hidden">
         {/* Top Search Bar */}
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
-              placeholder="Cari nama produk atau kategori..."
+              placeholder="Cari nama produk, kategori, atau SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A] transition"
@@ -148,6 +159,7 @@ export default function ProductManagement() {
             <thead className="bg-[#F5EFEA] text-slate-600 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
               <tr>
                 <th className="py-3.5 px-6">Produk</th>
+                <th className="py-3.5 px-4">SKU</th>
                 <th className="py-3.5 px-4">Kategori</th>
                 <th className="py-3.5 px-4">Harga</th>
                 <th className="py-3.5 px-4">Stok</th>
@@ -168,10 +180,11 @@ export default function ProductManagement() {
                         />
                         <div>
                           <p className="font-semibold text-slate-900">{item.nama}</p>
-                          <p className="text-xs text-slate-400">ID: #{item.id}</p>
+                          <p className="text-xs text-slate-400 line-clamp-1">{item.deskripsi || 'Tidak ada deskripsi'}</p>
                         </div>
                       </div>
                     </td>
+                    <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-600">{item.sku}</td>
                     <td className="py-4 px-4 text-slate-600">{item.kategori}</td>
                     <td className="py-4 px-4 font-medium text-slate-900">
                       Rp {item.harga.toLocaleString('id-ID')}
@@ -196,7 +209,7 @@ export default function ProductManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="py-8 text-center text-slate-400">
+                  <td colSpan="7" className="py-8 text-center text-slate-400">
                     Tidak ada produk yang ditemukan.
                   </td>
                 </tr>
@@ -209,7 +222,7 @@ export default function ProductManagement() {
       {/* MODAL TAMBAH PRODUK */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-5">
               <h3 className="font-bold text-slate-900 text-lg">Tambah Produk Baru</h3>
@@ -223,6 +236,19 @@ export default function ProductManagement() {
 
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  SKU (Stock Keeping Unit)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: SKU-004 (Opsional)"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Nama Produk
@@ -254,7 +280,7 @@ export default function ProductManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    Harga (RP)
+                    Harga (Rp)
                   </label>
                   <input
                     type="number"
@@ -277,6 +303,19 @@ export default function ProductManagement() {
                     className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Deskripsi Produk
+                </label>
+                <textarea
+                  placeholder="Keterangan singkat mengenai produk..."
+                  value={formData.deskripsi}
+                  onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+                  rows={3}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
+                />
               </div>
 
               {/* Modal Actions */}
