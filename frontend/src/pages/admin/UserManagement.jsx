@@ -3,43 +3,42 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
 
 export default function UserManagement() {
-  // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
-  const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem('users_data');
-    if (savedUsers) {
-      return JSON.parse(savedUsers);
-    }
-    return [
-      { id: 1, name: 'Admin', email: 'admin@harafina.com', role: 'Admin' },
-      { id: 2, name: 'Hendra Wijaya', email: 'owner@harafina.com', role: 'Owner' },
-      { id: 3, name: 'Rudi Hartono', email: 'rudi@harafina.com', role: 'Pelanggan' },
-    ];
-  });
+  const [users, setUsers] = useState([
+    { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
+    {
+      id: 2,
+      name: "Hendra Wijaya",
+      email: "owner@harafina.com",
+      role: "Owner",
+    },
+    {
+      id: 3,
+      name: "Rudi Hartono",
+      email: "rudi@harafina.com",
+      role: "Pelanggan",
+    },
+  ]);
 
-  // Simpan ke localStorage setiap kali ada perubahan pada state users
-  useEffect(() => {
-    localStorage.setItem('users_data', JSON.stringify(users));
-  }, [users]);
-
-  const [activeTab, setActiveTab] = useState('Semua');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // State untuk menyimpan data form & user yang sedang diedit (null jika mode tambah baru)
-  const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Admin' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "Admin",
+  });
 
   // Fungsi untuk menentukan warna badge berdasarkan role
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case 'Admin':
-        return 'bg-blue-100 text-blue-600';
-      case 'Owner':
-        return 'bg-purple-100 text-purple-600';
-      case 'Pelanggan':
-        return 'bg-emerald-100 text-emerald-600';
+      case "Admin":
+        return "bg-blue-100 text-blue-600";
+      case "Owner":
+        return "bg-purple-100 text-purple-600";
+      case "Pelanggan":
+        return "bg-emerald-100 text-emerald-600";
       default:
-        return 'bg-gray-100 text-gray-600';
+        return "bg-gray-100 text-gray-600";
     }
   };
 
@@ -69,16 +68,8 @@ export default function UserManagement() {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
 
-    if (editingUser) {
-      // Mode Edit: Update user yang sesuai dengan ID
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
-    } else {
-      // Mode Tambah: Buat user baru
-      setUsers([...users, { id: Date.now(), ...formData }]);
-    }
-
-    setFormData({ name: '', email: '', role: 'Admin' });
-    setEditingUser(null);
+    setUsers([...users, { id: Date.now(), ...formData }]);
+    setFormData({ name: "", email: "", role: "Admin" });
     setIsModalOpen(false);
   };
 
@@ -94,7 +85,9 @@ export default function UserManagement() {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Manajemen User</h2>
-          <p className="text-xs text-gray-400 mt-1">Kelola data pengguna, hak akses, dan status akun sistem.</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Kelola data pengguna, hak akses, dan status akun sistem.
+          </p>
         </div>
 
         <button
@@ -109,7 +102,10 @@ export default function UserManagement() {
       {/* Filter & Search Bar */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-sm">
         <div className="relative w-full md:w-80">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             placeholder="Cari nama atau email..."
@@ -120,14 +116,14 @@ export default function UserManagement() {
         </div>
 
         <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto">
-          {['Semua', 'Admin', 'Owner', 'Pelanggan'].map((tab) => (
+          {["Semua", "Admin", "Owner", "Pelanggan"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 activeTab === tab
-                  ? 'bg-[#8D5B3A] text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-800'
+                  ? "bg-[#8D5B3A] text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800"
               }`}
             >
               {tab}
@@ -210,7 +206,9 @@ export default function UserManagement() {
             </div>
             <form onSubmit={handleSubmitUser} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-gray-600 mb-1">NAMA LENGKAP</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  NAMA LENGKAP
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: Budi Santoso"
@@ -221,7 +219,9 @@ export default function UserManagement() {
                 />
               </div>
               <div>
-                <label className="block font-bold text-gray-600 mb-1">EMAIL</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  EMAIL
+                </label>
                 <input
                   type="email"
                   placeholder="Contoh: budi@harafina.com"
@@ -232,7 +232,9 @@ export default function UserManagement() {
                 />
               </div>
               <div>
-                <label className="block font-bold text-gray-600 mb-1">ROLE</label>
+                <label className="block font-bold text-gray-600 mb-1">
+                  ROLE
+                </label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
