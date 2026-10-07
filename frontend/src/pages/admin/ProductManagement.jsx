@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout"; // Sesuaikan path folder jika berbeda
 import {
@@ -11,6 +12,21 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+=======
+import React, { useState, useEffect } from 'react';
+import DashboardLayout from '../../components/DashboardLayout'; 
+import { 
+  Package, 
+  ShoppingCart, 
+  History, 
+  Users, 
+  Plus, 
+  Search, 
+  Edit3, 
+  Trash2, 
+  X 
+} from 'lucide-react';
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
 
 export default function ProductManagement() {
   // Ambil data awal dari localStorage jika ada, jika tidak pakai data dummy
@@ -22,6 +38,7 @@ export default function ProductManagement() {
     return [
       {
         id: 1,
+<<<<<<< HEAD
         nama: "Gula Semut Organik",
         kategori: "Pemanis & Gula",
         harga: 25000,
@@ -44,6 +61,36 @@ export default function ProductManagement() {
         stok: 0,
         image: "https://via.placeholder.com/50",
       },
+=======
+        sku: 'SKU-001',
+        nama: 'Gula Semut Organik',
+        kategori: 'Pemanis & Gula',
+        harga: 25000,
+        stok: 45,
+        deskripsi: 'Gula semut murni berkualitas tinggi dari nira kelapa pilihan.',
+        image: 'https://via.placeholder.com/50'
+      },
+      {
+        id: 2,
+        sku: 'SKU-002',
+        nama: 'Tepung Super Brand',
+        kategori: 'Tepung & Biji-bijian',
+        harga: 15000,
+        stok: 8,
+        deskripsi: 'Tepung terigu protein sedang cocok untuk aneka kue.',
+        image: 'https://via.placeholder.com/50'
+      },
+      {
+        id: 3,
+        sku: 'SKU-003',
+        nama: 'Ragi Fermipan Instan',
+        kategori: 'Bahan Roti & Kue',
+        harga: 7500,
+        stok: 0,
+        deskripsi: 'Ragi instan aktif untuk mengembangkan adonan roti dengan cepat.',
+        image: 'https://via.placeholder.com/50'
+      }
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
     ];
   });
 
@@ -57,10 +104,19 @@ export default function ProductManagement() {
 
   // Form State untuk Tambah Produk
   const [formData, setFormData] = useState({
+<<<<<<< HEAD
     nama: "",
     kategori: "",
     harga: "",
     stok: "",
+=======
+    sku: '',
+    nama: '',
+    kategori: '',
+    harga: '',
+    stok: '',
+    deskripsi: '',
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   });
 
   // Fungsi Badge Status berdasarkan stok
@@ -87,10 +143,17 @@ export default function ProductManagement() {
   };
 
   // Filter Search
+<<<<<<< HEAD
   const filteredProducts = products.filter(
     (item) =>
       item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.kategori.toLowerCase().includes(searchTerm.toLowerCase()),
+=======
+  const filteredProducts = products.filter(item =>
+    item.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.kategori.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   );
 
   // Handle Submit Form
@@ -99,17 +162,31 @@ export default function ProductManagement() {
     if (!formData.nama || !formData.kategori) return;
 
     const newProduct = {
+<<<<<<< HEAD
       id: products.length > 0 ? Math.max(...products.map((p) => p.id)) + 1 : 1,
+=======
+      id: products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1,
+      sku: formData.sku || `SKU-00${products.length + 1}`,
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
       nama: formData.nama,
       kategori: formData.kategori,
       harga: Number(formData.harga) || 0,
       stok: Number(formData.stok) || 0,
+<<<<<<< HEAD
       image: "https://via.placeholder.com/50",
+=======
+      deskripsi: formData.deskripsi,
+      image: 'https://via.placeholder.com/50'
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
     };
 
     setProducts([...products, newProduct]);
     setIsModalOpen(false);
+<<<<<<< HEAD
     setFormData({ nama: "", kategori: "", harga: "", stok: "" });
+=======
+    setFormData({ sku: '', nama: '', kategori: '', harga: '', stok: '', deskripsi: '' });
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
   };
 
   // Delete Handler
@@ -124,12 +201,17 @@ export default function ProductManagement() {
       {/* Header Halaman */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
+<<<<<<< HEAD
           <h1 className="text-2xl font-bold text-slate-900">
             Manajemen Produk
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             Kelola daftar produk, harga, dan ketersediaan stok admin.
           </p>
+=======
+          <h1 className="text-2xl font-bold text-slate-900">Manajemen Produk</h1>
+          <p className="text-sm text-slate-500 mt-1">Kelola daftar produk, SKU, harga, dan ketersediaan stok admin.</p>
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -141,7 +223,7 @@ export default function ProductManagement() {
       </div>
 
       {/* Card Content Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/85 overflow-hidden">
         {/* Top Search Bar */}
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="relative w-full sm:w-96">
@@ -151,7 +233,7 @@ export default function ProductManagement() {
             />
             <input
               type="text"
-              placeholder="Cari nama produk atau kategori..."
+              placeholder="Cari nama produk, kategori, atau SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A] transition"
@@ -171,6 +253,7 @@ export default function ProductManagement() {
             <thead className="bg-[#F5EFEA] text-slate-600 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
               <tr>
                 <th className="py-3.5 px-6">Produk</th>
+                <th className="py-3.5 px-4">SKU</th>
                 <th className="py-3.5 px-4">Kategori</th>
                 <th className="py-3.5 px-4">Harga</th>
                 <th className="py-3.5 px-4">Stok</th>
@@ -190,6 +273,7 @@ export default function ProductManagement() {
                           className="w-10 h-10 rounded-lg object-cover bg-slate-100 border"
                         />
                         <div>
+<<<<<<< HEAD
                           <p className="font-semibold text-slate-900">
                             {item.nama}
                           </p>
@@ -199,6 +283,15 @@ export default function ProductManagement() {
                     <td className="py-4 px-4 text-slate-600">
                       {item.kategori}
                     </td>
+=======
+                          <p className="font-semibold text-slate-900">{item.nama}</p>
+                          <p className="text-xs text-slate-400 line-clamp-1">{item.deskripsi || 'Tidak ada deskripsi'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-600">{item.sku}</td>
+                    <td className="py-4 px-4 text-slate-600">{item.kategori}</td>
+>>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
                     <td className="py-4 px-4 font-medium text-slate-900">
                       Rp {item.harga.toLocaleString("id-ID")}
                     </td>
@@ -229,7 +322,7 @@ export default function ProductManagement() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="py-8 text-center text-slate-400">
+                  <td colSpan="7" className="py-8 text-center text-slate-400">
                     Tidak ada produk yang ditemukan.
                   </td>
                 </tr>
@@ -242,7 +335,7 @@ export default function ProductManagement() {
       {/* MODAL TAMBAH PRODUK */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-150">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-150 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-5">
               <h3 className="font-bold text-slate-900 text-lg">
@@ -258,6 +351,19 @@ export default function ProductManagement() {
 
             {/* Modal Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  SKU (Stock Keeping Unit)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: SKU-004 (Opsional)"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Nama Produk
@@ -293,7 +399,7 @@ export default function ProductManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                    Harga (RP)
+                    Harga (Rp)
                   </label>
                   <input
                     type="number"
@@ -320,6 +426,19 @@ export default function ProductManagement() {
                     className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Deskripsi Produk
+                </label>
+                <textarea
+                  placeholder="Keterangan singkat mengenai produk..."
+                  value={formData.deskripsi}
+                  onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+                  rows={3}
+                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
+                />
               </div>
 
               {/* Modal Actions */}
