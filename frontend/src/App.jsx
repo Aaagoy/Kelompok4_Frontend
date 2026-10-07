@@ -2,15 +2,16 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // import Dashboard from "./pages/Dashboard.jsx";
 // import ProtectedRoute from "./components/ProtectedRoute";
 // Halaman Publik & Auth
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 // Halaman Admin
-import AdminDashboard from './pages/admin/AdminDashboard';
-import UserManagement from './pages/admin/UserManagement'; // Import komponen UserManagement
-import ProductManagement from './pages/admin/ProductManagement';
-import CategoryManagement from './pages/admin/CategoryManagement';
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement"; // Import komponen UserManagement
+import ProductManagement from "./pages/admin/ProductManagement";
+import CategoryManagement from "./pages/admin/CategoryManagement";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
@@ -24,7 +25,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Rute Terproteksi Khusus Admin */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/produk" element={<ProductManagement />} />

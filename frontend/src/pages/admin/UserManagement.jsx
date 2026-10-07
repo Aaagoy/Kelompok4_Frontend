@@ -1,64 +1,45 @@
-<<<<<<< HEAD
-import { useState } from "react";
-import DashboardLayout from "../../components/DashboardLayout"; // Sesuaikan path jika berbeda folder
+import { useState, useEffect } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
 import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
-    {
-      id: 2,
-      name: "Hendra Wijaya",
-      email: "owner@harafina.com",
-      role: "Owner",
-    },
-    {
-      id: 3,
-      name: "Rudi Hartono",
-      email: "rudi@harafina.com",
-      role: "Pelanggan",
-    },
-  ]);
-=======
-import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout'; 
-import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
-
-export default function UserManagement() {
+  const [editingUser, setEditingUser] = useState(null);
   // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
   const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem('users_data');
+    const savedUsers = localStorage.getItem("users_data");
     if (savedUsers) {
       return JSON.parse(savedUsers);
     }
     return [
-      { id: 1, name: 'Admin', email: 'admin@harafina.com', role: 'Admin' },
-      { id: 2, name: 'Hendra Wijaya', email: 'owner@harafina.com', role: 'Owner' },
-      { id: 3, name: 'Rudi Hartono', email: 'rudi@harafina.com', role: 'Pelanggan' },
+      { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
+      {
+        id: 2,
+        name: "Hendra Wijaya",
+        email: "owner@harafina.com",
+        role: "Owner",
+      },
+      {
+        id: 3,
+        name: "Rudi Hartono",
+        email: "rudi@harafina.com",
+        role: "Pelanggan",
+      },
     ];
   });
 
   // Simpan ke localStorage setiap kali ada perubahan pada state users
   useEffect(() => {
-    localStorage.setItem('users_data', JSON.stringify(users));
+    localStorage.setItem("users_data", JSON.stringify(users));
   }, [users]);
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
 
   const [activeTab, setActiveTab] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-<<<<<<< HEAD
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     role: "Admin",
   });
-=======
-  
-  // State untuk menyimpan data form & user yang sedang diedit (null jika mode tambah baru)
-  const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState({ name: '', email: '', role: 'Admin' });
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
 
   // Fungsi untuk menentukan warna badge berdasarkan role
   const getRoleBadgeClass = (role) => {
@@ -85,7 +66,7 @@ export default function UserManagement() {
   // Fungsi Buka Modal untuk Tambah Baru
   const handleOpenAddModal = () => {
     setEditingUser(null);
-    setFormData({ name: '', email: '', role: 'Admin' });
+    setFormData({ name: "", email: "", role: "Admin" });
     setIsModalOpen(true);
   };
 
@@ -101,21 +82,8 @@ export default function UserManagement() {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
 
-<<<<<<< HEAD
     setUsers([...users, { id: Date.now(), ...formData }]);
     setFormData({ name: "", email: "", role: "Admin" });
-=======
-    if (editingUser) {
-      // Mode Edit: Update user yang sesuai dengan ID
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...formData } : u));
-    } else {
-      // Mode Tambah: Buat user baru
-      setUsers([...users, { id: Date.now(), ...formData }]);
-    }
-
-    setFormData({ name: '', email: '', role: 'Admin' });
-    setEditingUser(null);
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
     setIsModalOpen(false);
   };
 
@@ -214,21 +182,18 @@ export default function UserManagement() {
                     </td>
                     <td className="py-4 px-6 text-center">
                       <div className="flex justify-center items-center gap-2">
-                        <button 
-                          onClick={() => handleOpenEditModal(user)} 
+                        <button
+                          onClick={() => handleOpenEditModal(user)}
                           className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors"
                           title="Edit User"
                         >
                           <Pencil size={15} />
                         </button>
-<<<<<<< HEAD
                         <button
                           onClick={() => handleDelete(user.id)}
                           className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors"
+                          title="Hapus User"
                         >
-=======
-                        <button onClick={() => handleDelete(user.id)} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors" title="Hapus User">
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -253,18 +218,12 @@ export default function UserManagement() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-800 text-sm">
-<<<<<<< HEAD
                 Tambah User Baru
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-=======
-                {editingUser ? 'Edit Data User' : 'Tambah User Baru'}
-              </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
->>>>>>> 8b1827f577a688126d2918c455ebd745684cd1cd
                 <X size={18} />
               </button>
             </div>
@@ -327,7 +286,7 @@ export default function UserManagement() {
                   type="submit"
                   className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors"
                 >
-                  {editingUser ? 'Simpan Perubahan' : 'Simpan User'}
+                  {editingUser ? "Simpan Perubahan" : "Simpan User"}
                 </button>
               </div>
             </form>
