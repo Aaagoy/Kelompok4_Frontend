@@ -1,11 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-// import Dashboard from "./pages/Dashboard.jsx";
-// import ProtectedRoute from "./components/ProtectedRoute";
-// Halaman Publik & Auth
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
 // Halaman Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement"; // Import komponen UserManagement
