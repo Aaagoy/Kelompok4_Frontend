@@ -45,7 +45,7 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
         </div>
         <div className="overflow-hidden">
           <p className="text-[11px] font-bold text-amber-100 truncate">{brandName}</p>
-          <p className="text-[9px] text-amber-100/60 truncate">Sistem Kasir & Dapur</p>
+          <p className="text-[9px] text-amber-100/60 truncate">Admin</p>
         </div>
       </div>
     </aside>

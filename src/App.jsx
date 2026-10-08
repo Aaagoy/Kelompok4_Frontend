@@ -12,6 +12,7 @@ import UserManagement from './pages/admin/UserManagement';
 import ProductManagement from './pages/admin/ProductManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 import ReportManagement from './pages/admin/ReportManagement';
+import SupplierManagement from './pages/admin/SupplierManagement';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/users" element={<UserManagement />} />
           <Route path="/produk" element={<ProductManagement />} />
           <Route path="/kategori" element={<CategoryManagement />} />
+          <Route path="/supplier" element={<SupplierManagement />} />
         </Route>
 
         {/* Rute Terproteksi Khusus Admin */}
