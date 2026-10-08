@@ -3,23 +3,6 @@ import DashboardLayout from "../../components/DashboardLayout";
 import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
-<<<<<<< HEAD
-  const [users, setUsers] = useState([
-    { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
-    {
-      id: 2,
-      name: "Hendra Wijaya",
-      email: "owner@harafina.com",
-      role: "Owner",
-    },
-    {
-      id: 3,
-      name: "Rudi Hartono",
-      email: "rudi@harafina.com",
-      role: "Pelanggan",
-    },
-  ]);
-=======
   const [editingUser, setEditingUser] = useState(null);
   // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
   const [users, setUsers] = useState(() => {
@@ -48,7 +31,6 @@ export default function UserManagement() {
   useEffect(() => {
     localStorage.setItem("users_data", JSON.stringify(users));
   }, [users]);
->>>>>>> 577f412c64c8c6ff8057eb16214c2636dbd798a5
 
   const [activeTab, setActiveTab] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");

@@ -11,7 +11,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
 import ProductManagement from './pages/admin/ProductManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
-import AdminLaporan from './pages/admin/AdminLaporan';
+import ReportManagement from './pages/admin/ReportManagement';
 
 export default function App() {
   return (
@@ -32,7 +32,7 @@ export default function App() {
 
         {/* Rute Terproteksi Khusus Admin */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
-          <Route path="/laporan" element={<AdminLaporan />} />
+          <Route path="/laporan" element={<ReportManagement />} />
         </Route>
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />
