@@ -1,7 +1,5 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-// Tambahkan parameter { menuItems, brandName } pada props
 const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
   const location = useLocation();
 
@@ -41,9 +39,13 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
       </div>
 
       {/* Profile Footer */}
-      <div className="flex items-center gap-3 px-3 py-2 bg-black/20 rounded-xl mt-auto">
+      <div className="flex items-center gap-3 px-3 py-2.5 bg-black/20 rounded-xl mt-auto">
         <div className="w-8 h-8 rounded-full bg-[#2C1A17] text-white flex items-center justify-center text-xs font-bold shadow-inner">
           N
+        </div>
+        <div className="overflow-hidden">
+          <p className="text-xs font-bold text-amber-100 truncate">{brandName}</p>
+          <p className="text-[10px] text-amber-100/60">Sistem Kasir & Dapur</p>
         </div>
       </div>
     </aside>

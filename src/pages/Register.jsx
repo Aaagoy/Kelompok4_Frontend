@@ -12,6 +12,7 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleRegister = () => {
+    e.preventDefault();
     setErrorMsg("");
     setSuccessMsg("");
 
@@ -55,13 +56,13 @@ const Register = () => {
     };
 
     // Simpan kembali ke localStorage agar terbaca di Menu User
+    existingUsers.push(newUser);
     localStorage.setItem("users_data", JSON.stringify([...existingUsers, newUser]));
 
     // Berhasil Mendaftar
     setSuccessMsg("Registrasi berhasil! Mengalihkan ke halaman login...");
-    setTimeout(() => {
-      navigate("/login");
-    }, 1500);
+    alert("Registrasi berhasil! Silakan masuk dengan akun Anda.");
+    navigate("/login");
   };
 
   return (

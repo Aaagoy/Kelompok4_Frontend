@@ -1,21 +1,29 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+<<<<<<< HEAD
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-// Halaman Admin
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import UserManagement from "./pages/admin/UserManagement"; // Import komponen UserManagement
-import ProductManagement from "./pages/admin/ProductManagement";
-import CategoryManagement from "./pages/admin/CategoryManagement";
+=======
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Halaman Publik & Auth
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+>>>>>>> b3a974a7835f1ef3ce4c2c4871dde46d17b79210
+// Halaman Admin
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement';
+import ProductManagement from './pages/admin/ProductManagement';
+import CategoryManagement from './pages/admin/CategoryManagement';
+import ReportManagement from './pages/admin/ReportManagement';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Rute Publik */}
-        {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -28,6 +36,10 @@ export default function App() {
           <Route path="/kategori" element={<CategoryManagement />} />
         </Route>
 
+        {/* Rute Terproteksi Khusus Admin */}
+        <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
+          <Route path="/laporan" element={<ReportManagement />} />
+        </Route>
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

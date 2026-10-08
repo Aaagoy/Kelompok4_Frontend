@@ -1,18 +1,52 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
-    localStorage.setItem("token", "dummy-token");
-    localStorage.setItem("role", "admin");
-    navigate("/admin/dashboard");
+    setErrorMsg("");
+
+    if (!email || !password) {
+      setErrorMsg("Email dan password wajib diisi!");
+      return;
+    }
+
+    // Ambil data users dari localStorage atau gunakan default bawaan sistem
+    const existingUsers = JSON.parse(localStorage.getItem("users_data")) || [
+      { id: 1, name: "Admin", email: "admin@harafina.com", role: "admin" },
+      { id: 2, name: "Hendra Wijaya", email: "owner@harafina.com", role: "owner" },
+      { id: 3, name: "Rudi Hartono", email: "rudi@harafina.com", role: "kasir" }
+    ];
+
+    // Cek apakah email terdaftar di sistem
+    const foundUser = existingUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!foundUser) {
+      setErrorMsg("Email tidak ditemukan. Silakan daftar terlebih dahulu.");
+      return;
+    }
+
+    // Simpan token, role, dan nama user ke localStorage
+    localStorage.setItem("token", "dummy-token-harafina");
+    const userRole = foundUser.role ? foundUser.role.toLowerCase() : "user";
+    localStorage.setItem("role", userRole);
+    localStorage.setItem("userName", foundUser.name);
+
+    // Redirect berdasarkan role masing-sama:
+    if (userRole === "admin") {
+      navigate("/dashboard"); // Menuju dashboard admin
+    } else if (userRole === "owner") {
+      navigate("/laporan"); // Menuju halaman laporan owner (pastikan rute ini ada di App.jsx)
+    } else {
+      navigate("/"); // Menuju homepage untuk user biasa/kasir
+    }
   };
 
   return (
@@ -26,6 +60,12 @@ const Login = () => {
             Silakan masukkan akun Anda untuk melanjutkan
           </p>
         </div>
+
+        {errorMsg && (
+          <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-600 text-xs rounded-xl text-center font-medium">
+            {errorMsg}
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
@@ -75,12 +115,19 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2"
+            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2 cursor-pointer"
           >
             <span>Masuk Sekarang</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        <p className="text-center text-xs text-amber-900/70 mt-6">
+          Belum punya akun?{" "}
+          <Link to="/register" className="font-bold text-[#8D5B28] hover:underline">
+            Daftar di sini
+          </Link>
+        </p>
       </div>
     </div>
   );
