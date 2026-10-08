@@ -1,9 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-<<<<<<< HEAD
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-=======
 import ProtectedRoute from "./components/ProtectedRoute";
 
 // Halaman Publik & Auth
@@ -11,7 +6,6 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
->>>>>>> b3a974a7835f1ef3ce4c2c4871dde46d17b79210
 // Halaman Admin
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserManagement from './pages/admin/UserManagement';
