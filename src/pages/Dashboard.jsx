@@ -176,7 +176,7 @@ export default function Dashboard() {
                   Harafina
                 </h1>
                 <p className="mt-0.5 text-[13px] text-[#64789a]">
-                  “Belanja Mudah, Hidup Lebih Baik”
+                  “Toko Bahan Kue dan Dapur”
                 </p>
               </div>
             </div>
