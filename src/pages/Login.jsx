@@ -53,7 +53,9 @@ const Login = () => {
     <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-3xl shadow-lg border border-amber-900/5 max-w-md w-full">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#3E2723]">Masuk ke Harafina</h2>
+          <h2 className="text-2xl font-bold text-[#3E2723]">
+            Masuk ke Harafina
+          </h2>
           <p className="text-sm text-amber-900/60 mt-1">
             Silakan masukkan akun Anda untuk melanjutkan
           </p>
@@ -102,7 +104,11 @@ const Login = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 text-amber-900/40 hover:text-[#3E2723]"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>

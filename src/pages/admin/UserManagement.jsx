@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/DashboardLayout'; 
-import { Plus, Search, Pencil, Trash2, User, X } from 'lucide-react';
+import { useState, useEffect } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
+import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
+<<<<<<< HEAD
   const [users, setUsers] = useState([
     { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
     {
@@ -18,6 +19,36 @@ export default function UserManagement() {
       role: "Pelanggan",
     },
   ]);
+=======
+  const [editingUser, setEditingUser] = useState(null);
+  // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
+  const [users, setUsers] = useState(() => {
+    const savedUsers = localStorage.getItem("users_data");
+    if (savedUsers) {
+      return JSON.parse(savedUsers);
+    }
+    return [
+      { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
+      {
+        id: 2,
+        name: "Hendra Wijaya",
+        email: "owner@harafina.com",
+        role: "Owner",
+      },
+      {
+        id: 3,
+        name: "Rudi Hartono",
+        email: "rudi@harafina.com",
+        role: "Pelanggan",
+      },
+    ];
+  });
+
+  // Simpan ke localStorage setiap kali ada perubahan pada state users
+  useEffect(() => {
+    localStorage.setItem("users_data", JSON.stringify(users));
+  }, [users]);
+>>>>>>> 577f412c64c8c6ff8057eb16214c2636dbd798a5
 
   const [activeTab, setActiveTab] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,16 +74,17 @@ export default function UserManagement() {
   };
 
   const filteredUsers = users.filter((u) => {
-    const matchesTab = activeTab === 'Semua' ? true : u.role === activeTab;
-    const matchesSearch = u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          u.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
+    const matchesSearch =
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
   // Fungsi Buka Modal untuk Tambah Baru
   const handleOpenAddModal = () => {
     setEditingUser(null);
-    setFormData({ name: '', email: '', role: 'Admin' });
+    setFormData({ name: "", email: "", role: "Admin" });
     setIsModalOpen(true);
   };
 
@@ -74,8 +106,8 @@ export default function UserManagement() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-      setUsers(users.filter(u => u.id !== id));
+    if (window.confirm("Apakah Anda yakin ingin menghapus user ini?")) {
+      setUsers(users.filter((u) => u.id !== id));
     }
   };
 
@@ -160,20 +192,26 @@ export default function UserManagement() {
                     </td>
                     <td className="py-4 px-6 text-gray-500">{user.email}</td>
                     <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}
+                      >
                         {user.role}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-center">
                       <div className="flex justify-center items-center gap-2">
-                        <button 
-                          onClick={() => handleOpenEditModal(user)} 
+                        <button
+                          onClick={() => handleOpenEditModal(user)}
                           className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors"
                           title="Edit User"
                         >
                           <Pencil size={15} />
                         </button>
-                        <button onClick={() => handleDelete(user.id)} className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors" title="Hapus User">
+                        <button
+                          onClick={() => handleDelete(user.id)}
+                          className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors"
+                          title="Hapus User"
+                        >
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -198,9 +236,12 @@ export default function UserManagement() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-800 text-sm">
-                {editingUser ? 'Edit Data User' : 'Tambah User Baru'}
+                Tambah User Baru
               </h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={18} />
               </button>
             </div>
@@ -213,7 +254,9 @@ export default function UserManagement() {
                   type="text"
                   placeholder="Contoh: Budi Santoso"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
                   required
                 />
@@ -226,7 +269,9 @@ export default function UserManagement() {
                   type="email"
                   placeholder="Contoh: budi@harafina.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
                   required
                 />
@@ -237,7 +282,9 @@ export default function UserManagement() {
                 </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#8D5B3A]"
                 >
                   <option value="Admin">Admin</option>
@@ -246,18 +293,18 @@ export default function UserManagement() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setIsModalOpen(false)} 
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
                 >
                   Batal
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors"
                 >
-                  {editingUser ? 'Simpan Perubahan' : 'Simpan User'}
+                  {editingUser ? "Simpan Perubahan" : "Simpan User"}
                 </button>
               </div>
             </form>

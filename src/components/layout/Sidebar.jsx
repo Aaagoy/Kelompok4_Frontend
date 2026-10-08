@@ -37,7 +37,7 @@ export default function Sidebar() {
   return (
     <>
       {/* MOBILE BURGER BUTTON */}
-      <button type="button" onClick={() => setIsOpen(true)} className="fixed left-4 top-4 z-[60] flex h-10 w-10 items-center justify-center rounded-lg bg-[#101b30] text-white shadow-lg md:hidden" aria-label="Buka navigasi">
+      <button type="button" onClick={() => setIsOpen(true)} className="fixed left-4 top-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#101b30] text-white shadow-lg md:hidden" aria-label="Buka navigasi">
         <Menu size={22} strokeWidth={2} />
       </button>
 
