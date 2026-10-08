@@ -3,7 +3,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 // Halaman Publik & Auth
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Login from './pages/Login';     
+import AdminLogin from './pages/admin/AdminLogin';
 import Register from './pages/Register';
 
 // Halaman Admin
@@ -18,9 +19,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rute Publik */}
+        {/* Rute Publik & Autentikasi */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} /> {/* Jalur login khusus staf toko bahan kue */}
         <Route path="/register" element={<Register />} />
 
         {/* Rute Terproteksi Khusus Admin */}
@@ -32,10 +34,11 @@ export default function App() {
           <Route path="/supplier" element={<SupplierManagement />} />
         </Route>
 
-        {/* Rute Terproteksi Khusus Admin */}
+        {/* Rute Terproteksi Khusus Owner */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
           <Route path="/laporan" element={<ReportManagement />} />
         </Route>
+
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

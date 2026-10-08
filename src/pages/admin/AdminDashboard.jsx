@@ -53,6 +53,8 @@ export default function AdminDashboard() {
 
       {/* Cards Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <a href="">
+
         <div className="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-emerald-800">
@@ -69,7 +71,10 @@ export default function AdminDashboard() {
             <span className="font-bold">↑ 12%</span> dari kemarin
           </p>
         </div>
+        </a>
 
+        <a href="/ReportManagement">
+        
         <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-blue-800">
@@ -84,6 +89,9 @@ export default function AdminDashboard() {
             <span className="font-bold">↑ 8%</span> dari kemarin
           </p>
         </div>
+
+        </a>
+
 
         <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
