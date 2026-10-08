@@ -54,7 +54,7 @@ const Login = () => {
       <div className="bg-white p-8 rounded-3xl shadow-lg border border-amber-900/5 max-w-md w-full">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-[#3E2723]">
-            Masuk ke Harafina
+            Masuk ke Portal Harafina
           </h2>
           <p className="text-sm text-amber-900/60 mt-1">
             Silakan masukkan akun Anda untuk melanjutkan
