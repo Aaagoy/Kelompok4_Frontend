@@ -1,42 +1,80 @@
-// import React from "react";
-import DashboardLayout from "../../components/DashboardLayout"; // Sesuaikan path folder jika berbeda
+import { useState, useEffect } from "react";
+import DashboardLayout from "../../components/DashboardLayout";
 import {
   LayoutDashboard,
   Receipt,
   Search,
   Eye,
-  DollarSign,
   ShoppingBag,
-  UserCheck,
+  Globe,
+  Store,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 
 export default function AdminDashboard() {
+  // State untuk mengambil data produk dari localStorage
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const savedProducts = localStorage.getItem("products_data");
+    if (savedProducts) {
+      setProducts(JSON.parse(savedProducts));
+    }
+  }, []);
+
+  // Hitung metrik dinamis khusus Toko Bahan Kue
+  const totalProduk = products.length;
+  
+  // Stok Kritis (stok <= 5)
+  const stokKritis = products.filter((p) => Number(p.stok) <= 5);
+
+  // Tanggal Sistem Hari Ini: 8 Oktober 2026
+  const today = new Date("2026-10-08");
+  const expiringSoon = products.filter((p) => {
+    if (!p.expiryDate) return false;
+    const expDate = new Date(p.expiryDate);
+    const diffTime = expDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 30;
+  });
+
+  const [searchTerm, setSearchTerm] = useState("");
   const transactions = [
     {
-      id: "TRX-20251003-001",
-      date: "03/10/2025 09:15",
-      customer: "Pelanggan Umum",
+      id: "TRX-20261008-001",
+      date: "08/10/2026 09:15",
+      type: "Online",
+      customer: "Siska (Web)",
       total: "Rp 128.000",
-      method: "Tunai",
-      status: "Selesai",
-    },
-    {
-      id: "TRX-20251003-002",
-      date: "03/10/2025 10:32",
-      customer: "Andi Saputra",
-      total: "Rp 75.000",
       method: "QRIS",
+      status: "Dikemas",
+    },
+    {
+      id: "TRX-20261008-002",
+      date: "08/10/2026 10:32",
+      type: "Offline",
+      customer: "Pelanggan Umum",
+      total: "Rp 45.000",
+      method: "Tunai",
       status: "Selesai",
     },
     {
-      id: "TRX-20251003-003",
-      date: "03/10/2025 11:05",
-      customer: "Siti Nurhaliza",
+      id: "TRX-20261008-003",
+      date: "08/10/2026 11:05",
+      type: "Online",
+      customer: "Andi Saputra",
       total: "Rp 164.000",
-      method: "Tunai",
+      method: "Transfer",
       status: "Selesai",
     },
   ];
+
+  const filteredTransactions = transactions.filter(
+    (trx) =>
+      trx.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trx.customer.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <DashboardLayout>
@@ -47,73 +85,127 @@ export default function AdminDashboard() {
           <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
         </div>
         <p className="text-xs text-gray-400">
-          Ringkasan aktivitas penjualan hari ini
+          Ringkasan operasional pesanan dan stok bahan kue hari ini
         </p>
       </div>
 
       {/* Cards Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        
+        {/* Pesanan Online */}
+        <div className="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-5 relative shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-indigo-800">
+              Pesanan Online
+            </span>
+            <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+              <Globe size={18} />
+            </div>
+          </div>
+          <p className="text-2xl font-extrabold text-gray-900 mb-2">12</p>
+          <p className="text-[11px] text-indigo-600 font-medium">
+            <span className="font-bold">Perlu Dikemas</span> (Web/WA)
+          </p>
+        </div>
+
+        {/* Pesanan Offline / Toko Fisik */}
         <div className="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-emerald-800">
-              Total Penjualan
+              Transaksi Kasir (Offline)
             </span>
             <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
-              <DollarSign size={18} />
+              <Store size={18} />
             </div>
           </div>
-          <p className="text-xl font-extrabold text-gray-900 mb-2">
-            Rp 1.234.567.890
-          </p>
+          <p className="text-2xl font-extrabold text-gray-900 mb-2">45</p>
           <p className="text-[11px] text-emerald-600 font-medium">
-            <span className="font-bold">↑ 12%</span> dari kemarin
+            <span className="font-bold">Selesai</span> di Toko Fisik
           </p>
         </div>
 
-        <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-5 relative shadow-sm">
+        {/* Peringatan Stok Menipis */}
+        <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-blue-800">
-              Total Transaksi
+            <span className="text-xs font-medium text-amber-800">
+              Stok Bahan Kritis
             </span>
-            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-              <Receipt size={18} />
+            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+              <AlertTriangle size={18} />
             </div>
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 mb-2">456</p>
-          <p className="text-[11px] text-blue-600 font-medium">
-            <span className="font-bold">↑ 8%</span> dari kemarin
+          <p className="text-2xl font-extrabold text-gray-900 mb-2">
+            {stokKritis.length} <span className="text-xs font-normal text-gray-500">Item</span>
+          </p>
+          <p className="text-[11px] text-amber-600 font-medium">
+            Stok ≤ 5 / Habis
           </p>
         </div>
 
+        {/* Total Keseluruhan Produk */}
         <div className="bg-purple-50/60 border border-purple-100 rounded-2xl p-5 relative shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-medium text-purple-800">
-              Total Produk
+              Total Katalog Produk
             </span>
             <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
               <ShoppingBag size={18} />
             </div>
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 mb-2">120</p>
+          <p className="text-2xl font-extrabold text-gray-900 mb-2">{totalProduk}</p>
           <p className="text-[11px] text-purple-600 font-medium">
-            <span className="font-bold">↑ 5%</span> dari kemarin
+            Terdaftar di Sistem
           </p>
+        </div>
+      </div>
+
+      {/* Widget Tambahan: Peringatan Stok & Kadaluwarsa */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        
+        {/* Box Stok Menipis */}
+        <div className="bg-white rounded-2xl border border-amber-100 p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4 text-amber-800 font-bold text-sm">
+            <AlertTriangle size={16} />
+            <h4>Daftar Bahan Kue Perlu Restock ({stokKritis.length})</h4>
+          </div>
+          {stokKritis.length > 0 ? (
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {stokKritis.map((item) => (
+                <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-amber-50/40 rounded-xl">
+                  <span className="font-semibold text-gray-800">{item.nama}</span>
+                  <span className="bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded-md font-bold">
+                    Sisa: {item.stok}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">Semua stok bahan aman.</p>
+          )}
         </div>
 
-        <div className="bg-amber-50/60 border border-amber-100 rounded-2xl p-5 relative shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-medium text-amber-800">
-              Total Pelanggan
-            </span>
-            <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
-              <UserCheck size={18} />
-            </div>
+        {/* Box Expired / Kadaluwarsa */}
+        <div className="bg-white rounded-2xl border border-rose-100 p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4 text-rose-800 font-bold text-sm">
+            <Clock size={16} />
+            <h4>Bahan Mendekati Kadaluwarsa ({expiringSoon.length})</h4>
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 mb-2">320</p>
-          <p className="text-[11px] text-amber-600 font-medium">
-            <span className="font-bold">↑ 7%</span> dari kemarin
-          </p>
+          {expiringSoon.length > 0 ? (
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {expiringSoon.map((item) => (
+                <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-rose-50/40 rounded-xl">
+                  <span className="font-semibold text-gray-800">{item.nama}</span>
+                  <span className="bg-rose-200/60 text-rose-900 px-2 py-0.5 rounded-md font-bold">
+                    Exp: {item.expiryDate}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">Tidak ada bahan yang mendekati masa kadaluwarsa.</p>
+          )}
         </div>
+
       </div>
 
       {/* Tabel Penjualan Terbaru */}
@@ -122,7 +214,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2">
             <Receipt className="text-[#8D5B3A]" size={18} />
             <h3 className="font-bold text-gray-800 text-sm">
-              Transaksi Penjualan Terbaru
+              Transaksi Penjualan Terbaru (Online & Offline)
             </h3>
           </div>
           <div className="relative">
@@ -133,6 +225,8 @@ export default function AdminDashboard() {
             <input
               type="text"
               placeholder="Cari transaksi..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8 pr-4 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-xl w-60 focus:outline-none focus:border-[#8D5B3A]"
             />
           </div>
@@ -144,22 +238,30 @@ export default function AdminDashboard() {
               <tr>
                 <th className="py-3.5 px-4">No</th>
                 <th className="py-3.5 px-4">ID Transaksi</th>
+                <th className="py-3.5 px-4">Tipe</th>
                 <th className="py-3.5 px-4">Tanggal</th>
                 <th className="py-3.5 px-4">Pelanggan</th>
                 <th className="py-3.5 px-4">Total Belanja</th>
-                <th className="py-3.5 px-4">Metode Pembayaran</th>
+                <th className="py-3.5 px-4">Pembayaran</th>
                 <th className="py-3.5 px-4">Status</th>
                 <th className="py-3.5 px-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-600">
-              {transactions.map((trx, index) => (
+              {filteredTransactions.map((trx, index) => (
                 <tr key={trx.id} className="hover:bg-gray-50/50">
                   <td className="py-3.5 px-4 font-medium text-gray-400">
                     {index + 1}
                   </td>
                   <td className="py-3.5 px-4 font-medium text-gray-800">
                     {trx.id}
+                  </td>
+                  <td className="py-3.5 px-4">
+                    <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
+                      trx.type === 'Online' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'
+                    }`}>
+                      {trx.type}
+                    </span>
                   </td>
                   <td className="py-3.5 px-4 text-gray-400">{trx.date}</td>
                   <td className="py-3.5 px-4">{trx.customer}</td>

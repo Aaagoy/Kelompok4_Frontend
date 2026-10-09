@@ -46,7 +46,7 @@ export default function DashboardLayout({ children }) {
             </div>
             <div>
               <h1 className="text-lg font-bold text-[#3E2723] leading-none">Harafina</h1>
-              <p className="text-xs text-gray-400 mt-1">"Belanja Mudah, Hidup Lebih Baik"</p>
+              <p className="text-xs text-gray-400 mt-1">"Toko Bahan Kue dan Dapur"</p>
             </div>
           </div>
 
