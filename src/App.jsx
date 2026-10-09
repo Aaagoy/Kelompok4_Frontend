@@ -35,7 +35,7 @@ export default function App() {
           <Route path="/kategori" element={<CategoryManagement />} />
           <Route path="/supplier" element={<SupplierManagement />} />
           <Route path="/offlineorders" element={<OfflineOrders />} />
-          <Route path="/laporan" element={<ReportManagement />} />
+          {/* <Route path="/laporan" element={<ReportManagement />} /> */}
           <Route path="/homepelanggan" element={<HomePelanggan />} />
         </Route>
         {/* Rute Terproteksi Khusus Owner */}
