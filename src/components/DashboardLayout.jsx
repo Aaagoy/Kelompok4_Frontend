@@ -1,38 +1,37 @@
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Package, 
-  Tags, 
-  Calculator, 
-  History, 
-  Users, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Receipt,
+  Package,
+  Tags,
+  Calculator,
+  History,
+  Users,
+  LogOut,
   Store,
   Truck,
-  BarChart3
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar'; // Impor komponen sidebar yang terpisah
+  BarChart3,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar"; // Impor komponen sidebar yang terpisah
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
 
   // Daftar menu khusus Admin
   const adminMenuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Transaksi', icon: Receipt, path: '/transaksi' },
-    { name: 'Produk', icon: Package, path: '/produk' },
-    { name: 'Kategori', icon: Tags, path: '/kategori' },
-    { name: 'Supplier', icon: Truck, path: '/supplier' },
-    { name: 'Kasir', icon: Calculator, path: '/kasir' },
-    { name: 'Riwayat', icon: History, path: '/riwayat' },
-    { name: 'Laporan', icon: BarChart3, path: '/laporan' },
-    { name: 'User', icon: Users, path: '/users' },
+    { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "Transaksi", icon: Receipt, path: "/transaksi" },
+    { name: "Produk", icon: Package, path: "/produk" },
+    { name: "Kategori", icon: Tags, path: "/kategori" },
+    { name: "Supplier", icon: Truck, path: "/supplier" },
+    { name: "Kasir", icon: Calculator, path: "/kasir" },
+    { name: "Riwayat", icon: History, path: "/riwayat" },
+    { name: "Laporan", icon: BarChart3, path: "/laporan" },
+    { name: "User", icon: Users, path: "/users" },
   ];
 
   return (
     <div className="flex h-screen bg-[#F5EFEA] font-sans">
-      
       {/* Memanggil Komponen Sidebar secara Reusable */}
       <Sidebar menuItems={adminMenuItems} brandName="Harafina" />
 
@@ -45,8 +44,12 @@ export default function DashboardLayout({ children }) {
               <Store size={22} />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-[#3E2723] leading-none">Harafina</h1>
-              <p className="text-xs text-gray-400 mt-1">"Toko Bahan Kue dan Dapur"</p>
+              <h1 className="text-lg font-bold text-[#3E2723] leading-none">
+                Harafina
+              </h1>
+              <p className="text-xs text-gray-400 mt-1">
+                "Toko Bahan Kue dan Dapur"
+              </p>
             </div>
           </div>
 
@@ -59,8 +62,8 @@ export default function DashboardLayout({ children }) {
               <span className="text-gray-400">˅</span>
             </div>
 
-            <button 
-              onClick={() => navigate('/login')}
+            <button
+              onClick={() => navigate("/login")}
               className="flex items-center gap-2 bg-[#8D5B28] hover:bg-[#724820] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm"
             >
               <LogOut size={14} />

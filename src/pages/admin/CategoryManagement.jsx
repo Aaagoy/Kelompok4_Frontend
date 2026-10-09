@@ -13,55 +13,79 @@ import {
 export default function CategoryManagement() {
   // Tab Aktif: 'kategori' atau 'subkategori'
   const [activeTab, setActiveTab] = useState("kategori");
+  const [category, setCategory] = useState([]);
+  const [subCategory, setSubCategory] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [nama, setNama] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+ async function loadData() {
+ try {
+ setLoading(true);
+ setError("");
+ const response = await getKategori();
+ setItems(response.data);
+ } catch {
+ setError("Gagal memuat data kategori.");
+ } finally {
+ setLoading(false);
+ }
+ }
+
 
   // State Kategori Utama (dengan localStorage)
-  const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem("categories_data");
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        id: 1,
-        nama: "Pemanis & Gula",
-        deskripsi: "Produk pemanis alami dan gula organik",
-      },
-      {
-        id: 2,
-        nama: "Tepung & Biji-bijian",
-        deskripsi: "Aneka jenis tepung kue dan biji-bijian",
-      },
-      {
-        id: 3,
-        nama: "Bahan Roti & Kue",
-        deskripsi: "Pengembang, ragi, dan perisa makanan",
-      },
-    ];
-  });
+  // const [categories, setCategories] = useState(() => {
+  //   const saved = localStorage.getItem("categories_data");
+  //   if (saved) return JSON.parse(saved);
+  //   return [
+  //     {
+  //       id: 1,
+  //       nama: "Pemanis & Gula",
+  //       deskripsi: "Produk pemanis alami dan gula organik",
+  //     },
+  //     {
+  //       id: 2,
+  //       nama: "Tepung & Biji-bijian",
+  //       deskripsi: "Aneka jenis tepung kue dan biji-bijian",
+  //     },
+  //     {
+  //       id: 3,
+  //       nama: "Bahan Roti & Kue",
+  //       deskripsi: "Pengembang, ragi, dan perisa makanan",
+  //     },
+  //   ];
+  // });
 
-  // State Sub-Kategori (dengan localStorage)
-  const [subCategories, setSubCategories] = useState(() => {
-    const saved = localStorage.getItem("subcategories_data");
-    if (saved) return JSON.parse(saved);
-    return [
-      {
-        id: 1,
-        kategoriId: 1,
-        nama: "Gula Semut",
-        deskripsi: "Sub-kategori gula semut aren & kelapa",
-      },
-      {
-        id: 2,
-        kategoriId: 2,
-        nama: "Tepung Terigu",
-        deskripsi: "Berbagai merk tepung terigu protein",
-      },
-      {
-        id: 3,
-        kategoriId: 3,
-        nama: "Ragi Instan",
-        deskripsi: "Ragi roti kering aktif",
-      },
-    ];
-  });
+  // // State Sub-Kategori (dengan localStorage)
+  // const [subCategories, setSubCategories] = useState(() => {
+  //   const saved = localStorage.getItem("subcategories_data");
+  //   if (saved) return JSON.parse(saved);
+  //   return [
+  //     {
+  //       id: 1,
+  //       kategoriId: 1,
+  //       nama: "Gula Semut",
+  //       deskripsi: "Sub-kategori gula semut aren & kelapa",
+  //     },
+  //     {
+  //       id: 2,
+  //       kategoriId: 2,
+  //       nama: "Tepung Terigu",
+  //       deskripsi: "Berbagai merk tepung terigu protein",
+  //     },
+  //     {
+  //       id: 3,
+  //       kategoriId: 3,
+  //       nama: "Ragi Instan",
+  //       deskripsi: "Ragi roti kering aktif",
+  //     },
+  //   ];
+  // });
 
   useEffect(() => {
     localStorage.setItem("categories_data", JSON.stringify(categories));
