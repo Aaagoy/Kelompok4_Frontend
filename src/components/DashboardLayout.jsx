@@ -1,15 +1,13 @@
 import { 
-  LayoutDashboard, 
-  Receipt, 
+  LayoutDashboard,
   Package, 
   Tags, 
-  Calculator, 
-  History, 
   Users, 
   LogOut, 
   Store,
   Truck,
-  BarChart3
+  BarChart3,
+  ShoppingBag
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar'; // Impor komponen sidebar yang terpisah
@@ -20,12 +18,10 @@ export default function DashboardLayout({ children }) {
   // Daftar menu khusus Admin
   const adminMenuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Transaksi', icon: Receipt, path: '/transaksi' },
+    { name: 'Pesanan Offline', icon: ShoppingBag, path: '/offlineorders' },
     { name: 'Produk', icon: Package, path: '/produk' },
     { name: 'Kategori', icon: Tags, path: '/kategori' },
     { name: 'Supplier', icon: Truck, path: '/supplier' },
-    { name: 'Kasir', icon: Calculator, path: '/kasir' },
-    { name: 'Riwayat', icon: History, path: '/riwayat' },
     { name: 'Laporan', icon: BarChart3, path: '/laporan' },
     { name: 'User', icon: Users, path: '/users' },
   ];

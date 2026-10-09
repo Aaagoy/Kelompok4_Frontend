@@ -50,7 +50,6 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
       {/* Profile Footer */}
       <div className="flex items-center gap-2.5 px-2.5 py-2 bg-white/5 rounded-xl mt-auto">
         <div className="w-7 h-7 rounded-full bg-[#8D5B28] text-white flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0">
-          N
         </div>
         <div className="overflow-hidden">
           <p className="text-[11px] font-bold text-white truncate">{brandName}</p>
