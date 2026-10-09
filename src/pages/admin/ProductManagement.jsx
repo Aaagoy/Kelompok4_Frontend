@@ -6,6 +6,10 @@ import {
   Edit3,
   Trash2,
   X,
+  Package,
+  AlertTriangle,
+  PackageX,
+  ShieldAlert
 } from "lucide-react";
 
 export default function ProductManagement() {
@@ -24,7 +28,8 @@ export default function ProductManagement() {
         stok: 45,
         expiryDate: '2026-12-31',
         deskripsi: 'Gula semut murni berkualitas tinggi dari nira kelapa pilihan.',
-        image: 'https://via.placeholder.com/50'
+        image: 'https://via.placeholder.com/50',
+        manualStatus: ''
       },
       {
         id: 2,
@@ -35,7 +40,8 @@ export default function ProductManagement() {
         stok: 8,
         expiryDate: '2026-10-31',
         deskripsi: 'Tepung terigu protein sedang cocok untuk aneka kue.',
-        image: 'https://via.placeholder.com/50'
+        image: 'https://via.placeholder.com/50',
+        manualStatus: ''
       },
       {
         id: 3,
@@ -46,7 +52,8 @@ export default function ProductManagement() {
         stok: 0,
         expiryDate: '2026-10-08',
         deskripsi: 'Ragi instan aktif untuk mengembangkan adonan roti dengan cepat.',
-        image: 'https://via.placeholder.com/50'
+        image: 'https://via.placeholder.com/50',
+        manualStatus: ''
       }
     ];
   });
@@ -69,41 +76,17 @@ export default function ProductManagement() {
     deskripsi: '',
   });
 
-  // Ambil pilihan kategori secara dinamis dari localStorage (terhubung ke CategoryManagement)
   const getCategoryOptions = () => {
     const savedCategories = localStorage.getItem("categories_data");
     if (savedCategories) {
       const parsed = JSON.parse(savedCategories);
       return parsed.map(cat => cat.nama);
     }
-    // Fallback default jika localStorage kategori kosong
     return [
       "Pemanis & Gula",
       "Tepung & Biji-bijian",
       "Bahan Roti & Kue",
     ];
-  };
-
-  const renderStatusBadge = (stok) => {
-    if (stok > 10) {
-      return (
-        <span className="px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full">
-          Tersedia
-        </span>
-      );
-    } else if (stok > 0) {
-      return (
-        <span className="px-3.5 py-1 text-xs font-semibold text-amber-700 bg-amber-100 rounded-full">
-          Stok Menipis
-        </span>
-      );
-    } else {
-      return (
-        <span className="px-3.5 py-1 text-xs font-semibold text-rose-700 bg-rose-100 rounded-full">
-          Habis
-        </span>
-      );
-    }
   };
 
   const checkExpiryStatus = (dateString) => {
@@ -122,6 +105,21 @@ export default function ProductManagement() {
     } else {
       return { status: 'safe', label: 'Aman' };
     }
+  };
+
+  // Hitung Metrik Statistik Inventaris Produk
+  const totalProductsCount = products.length;
+  const lowStockCount = products.filter(p => p.stok > 0 && p.stok <= 10 && (p.manualStatus !== 'Produk Ditarik')).length;
+  const expiredCount = products.filter(p => checkExpiryStatus(p.expiryDate).status === 'expired' && (p.manualStatus !== 'Produk Ditarik')).length;
+  const withdrawnCount = products.filter(p => p.manualStatus === 'Produk Ditarik').length;
+
+  // Fungsi untuk mengubah status produk secara interaktif
+  const handleStatusChange = (productId, newStatus) => {
+    setProducts(
+      products.map((p) =>
+        p.id === productId ? { ...p, manualStatus: newStatus } : p
+      )
+    );
   };
 
   const renderExpiryBadge = (dateString) => {
@@ -208,7 +206,8 @@ export default function ProductManagement() {
         stok: Number(formData.stok) || 0,
         expiryDate: formData.expiryDate,
         deskripsi: formData.deskripsi,
-        image: 'https://via.placeholder.com/50'
+        image: 'https://via.placeholder.com/50',
+        manualStatus: ''
       };
       setProducts([...products, newProduct]);
     }
@@ -237,18 +236,61 @@ export default function ProductManagement() {
               localStorage.removeItem("products_data");
               window.location.reload();
             }}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-medium text-sm transition"
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2.5 rounded-xl font-medium text-sm transition cursor-pointer"
             title="Reset penyimpanan lokal jika data tidak muncul"
           >
             Reset Cache
           </button>
           <button
             onClick={handleOpenAddModal}
-            className="flex items-center gap-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white px-4 py-2.5 rounded-xl font-medium shadow-sm transition"
+            className="flex items-center gap-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white px-4 py-2.5 rounded-xl font-medium shadow-sm transition cursor-pointer"
           >
             <Plus size={18} />
             Tambah Produk
           </button>
+        </div>
+      </div>
+
+      {/* KARTU METRIK / STATISTIK PRODUK */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+            <Package size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Total Jenis Produk</p>
+            <p className="text-xl font-bold text-slate-900">{totalProductsCount} Item</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+            <AlertTriangle size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Stok Menipis</p>
+            <p className="text-xl font-bold text-amber-700">{lowStockCount} Produk</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center font-bold">
+            <ShieldAlert size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Perlu Ditarik (Expired)</p>
+            <p className="text-xl font-bold text-rose-700">{expiredCount} Produk</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-bold">
+            <PackageX size={22} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400 font-medium">Produk Ditarik</p>
+            <p className="text-xl font-bold text-purple-700">{withdrawnCount} Produk</p>
+          </div>
         </div>
       </div>
 
@@ -275,9 +317,9 @@ export default function ProductManagement() {
           </span>
         </div>
 
-        {products.some(p => checkExpiryStatus(p.expiryDate).status === 'expired') && (
+        {products.some(p => checkExpiryStatus(p.expiryDate).status === 'expired' && p.manualStatus !== 'Produk Ditarik') && (
           <div className="m-4 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-rose-800 text-sm">
-            <span>⚠️ <strong>Perhatian:</strong> Ada produk di inventaris yang telah melewati tanggal kadaluarsa. Mohon segera periksa dan tarik dari stok toko.</span>
+            <span>⚠️ <strong>Perhatian:</strong> Ada produk kadaluarsa di inventaris. Silakan ubah pilihan status di tabel menjadi <strong>"Produk Ditarik"</strong> untuk mengamankan stok toko.</span>
           </div>
         )}
 
@@ -291,61 +333,83 @@ export default function ProductManagement() {
                 <th className="py-3.5 px-4">Harga</th>
                 <th className="py-3.5 px-4">Stok</th>
                 <th className="py-3.5 px-4">Kadaluarsa</th>
-                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Pilihan Status</th>
                 <th className="py-3.5 px-6 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={item.image}
-                          alt={item.nama}
-                          className="w-10 h-10 rounded-lg object-cover bg-slate-100 border"
-                        />
-                        <div>
-                          <p className="font-semibold text-slate-900">{item.nama}</p>
-                          <p className="text-xs text-slate-400 line-clamp-1">{item.deskripsi || 'Tidak ada deskripsi'}</p>
+                filteredProducts.map((item) => {
+                  const defaultAutoStatus = item.stok > 10 ? "Tersedia" : item.stok > 0 ? "Stok Menipis" : "Habis";
+                  const currentStatus = item.manualStatus || defaultAutoStatus;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/60 transition">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.image}
+                            alt={item.nama}
+                            className="w-10 h-10 rounded-lg object-cover bg-slate-100 border"
+                          />
+                          <div>
+                            <p className="font-semibold text-slate-900">{item.nama}</p>
+                            <p className="text-xs text-slate-400 line-clamp-1">{item.deskripsi || 'Tidak ada deskripsi'}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-600">{item.sku}</td>
-                    <td className="py-4 px-4 text-slate-600">{item.kategori}</td>
-                    <td className="py-4 px-4 font-medium text-slate-900">
-                      Rp {item.harga.toLocaleString("id-ID")}
-                    </td>
-                    <td className="py-4 px-4 text-slate-600">
-                      {item.stok} pcs
-                    </td>
-                    <td className="py-4 px-4">
-                      {renderExpiryBadge(item.expiryDate)}
-                    </td>
-                    <td className="py-4 px-4">
-                      {renderStatusBadge(item.stok)}
-                    </td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex justify-end gap-2 text-slate-600">
-                        <button
-                          onClick={() => handleOpenEditModal(item)}
-                          className="p-1.5 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition"
-                          title="Edit"
+                      </td>
+                      <td className="py-4 px-4 font-mono text-xs font-semibold text-slate-600">{item.sku}</td>
+                      <td className="py-4 px-4 text-slate-600">{item.kategori}</td>
+                      <td className="py-4 px-4 font-medium text-slate-900">
+                        Rp {item.harga.toLocaleString("id-ID")}
+                      </td>
+                      <td className="py-4 px-4 text-slate-600">
+                        {item.stok} pcs
+                      </td>
+                      <td className="py-4 px-4">
+                        {renderExpiryBadge(item.expiryDate)}
+                      </td>
+                      <td className="py-4 px-4">
+                        <select
+                          value={currentStatus}
+                          onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 cursor-pointer ${
+                            currentStatus === "Tersedia"
+                              ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                              : currentStatus === "Stok Menipis"
+                              ? "bg-amber-100 text-amber-800 border border-amber-200"
+                              : currentStatus === "Habis"
+                              ? "bg-rose-100 text-rose-700 border border-rose-200"
+                              : "bg-purple-100 text-purple-700 border border-purple-200"
+                          }`}
                         >
-                          <Edit3 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                          title="Hapus"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          <option value="Tersedia">Tersedia</option>
+                          <option value="Stok Menipis">Stok Menipis</option>
+                          <option value="Habis">Habis</option>
+                          <option value="Produk Ditarik">Produk Ditarik</option>
+                        </select>
+                      </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex justify-end gap-2 text-slate-600">
+                          <button
+                            onClick={() => handleOpenEditModal(item)}
+                            className="p-1.5 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition cursor-pointer"
+                            title="Edit"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="8" className="py-8 text-center text-slate-400">
@@ -368,7 +432,7 @@ export default function ProductManagement() {
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -404,7 +468,6 @@ export default function ProductManagement() {
                 />
               </div>
 
-              {/* KATEGORI LIST BOX DINAMIS DARI LOCALSTORAGE */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Kategori
@@ -487,13 +550,13 @@ export default function ProductManagement() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                  className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-[#8D5B3A] hover:bg-[#6D4227] rounded-xl shadow-sm transition"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#8D5B3A] hover:bg-[#6D4227] rounded-xl shadow-sm transition cursor-pointer"
                 >
                   {editingId !== null ? "Simpan Perubahan" : "Simpan Produk"}
                 </button>

@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  ReceiptText,
   Package,
-  Calculator,
-  History,
   Menu,
   X,
 } from "lucide-react";
@@ -17,24 +14,9 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    name: "Transaksi",
-    href: "/transaksi",
-    icon: ReceiptText,
-  },
-  {
     name: "Produk",
     href: "/produk",
     icon: Package,
-  },
-  {
-    name: "Kasir",
-    href: "/kasir",
-    icon: Calculator,
-  },
-  {
-    name: "Riwayat",
-    href: "/riwayat",
-    icon: History,
   },
 ];
 

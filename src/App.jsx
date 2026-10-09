@@ -14,6 +14,7 @@ import ProductManagement from './pages/admin/ProductManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 import ReportManagement from './pages/admin/ReportManagement';
 import SupplierManagement from './pages/admin/SupplierManagement';
+import OfflineOrders from './pages/admin/OfflineOrders';
 
 export default function App() {
   return (
@@ -32,6 +33,8 @@ export default function App() {
           <Route path="/produk" element={<ProductManagement />} />
           <Route path="/kategori" element={<CategoryManagement />} />
           <Route path="/supplier" element={<SupplierManagement />} />
+          <Route path="/offlineorders" element={<OfflineOrders />} />
+          <Route path="/laporan" element={<ReportManagement />} />
         </Route>
 
         {/* Rute Terproteksi Khusus Owner */}

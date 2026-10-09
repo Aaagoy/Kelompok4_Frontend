@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   LayoutDashboard,
   Receipt,
@@ -13,12 +14,28 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar"; // Impor komponen sidebar yang terpisah
+=======
+import { 
+  LayoutDashboard,
+  Package, 
+  Tags, 
+  Users, 
+  LogOut, 
+  Store,
+  Truck,
+  BarChart3,
+  ShoppingBag
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from './Sidebar'; // Impor komponen sidebar yang terpisah
+>>>>>>> d0f2c0b44b11785c61924d1fa536482f3cf582f7
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
 
   // Daftar menu khusus Admin
   const adminMenuItems = [
+<<<<<<< HEAD
     { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { name: "Transaksi", icon: Receipt, path: "/transaksi" },
     { name: "Produk", icon: Package, path: "/produk" },
@@ -28,6 +45,15 @@ export default function DashboardLayout({ children }) {
     { name: "Riwayat", icon: History, path: "/riwayat" },
     { name: "Laporan", icon: BarChart3, path: "/laporan" },
     { name: "User", icon: Users, path: "/users" },
+=======
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Pesanan Offline', icon: ShoppingBag, path: '/offlineorders' },
+    { name: 'Produk', icon: Package, path: '/produk' },
+    { name: 'Kategori', icon: Tags, path: '/kategori' },
+    { name: 'Supplier', icon: Truck, path: '/supplier' },
+    { name: 'Laporan', icon: BarChart3, path: '/laporan' },
+    { name: 'User', icon: Users, path: '/users' },
+>>>>>>> d0f2c0b44b11785c61924d1fa536482f3cf582f7
   ];
 
   return (
