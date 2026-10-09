@@ -5,7 +5,6 @@ import {
   Search,
   ShoppingCart,
   Trash2,
-  CheckCircle2,
   Clock,
   X,
   Store,
@@ -34,6 +33,7 @@ export default function OfflineOrders() {
           { productId: 2, name: "Tepung Super Brand", price: 15000, qty: 1 }
         ],
         totalAmount: 65000,
+        total: 65000, // Tambahkan alias 'total' agar sinkron langsung dengan Laporan Keuangan
         paymentMethod: "Tunai",
         status: "Selesai"
       }
@@ -58,12 +58,12 @@ export default function OfflineOrders() {
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [selectedOrderForPrint, setSelectedOrderForPrint] = useState(null);
 
-  // Metrik Statistik (Hanya status "Selesai" yang dihitung ke omzet)
+  // Metrik Statistik
   const totalOrdersToday = orders.length;
   const activeQueueCount = orders.filter(o => o.status === "Menunggu" || o.status === "Proses").length;
   const totalOmzetToday = orders
     .filter(o => o.status === "Selesai")
-    .reduce((sum, o) => sum + o.totalAmount, 0);
+    .reduce((sum, o) => sum + (o.totalAmount || o.total || 0), 0);
 
   const handleAddToCart = (product) => {
     if (product.stok <= 0) {
@@ -133,16 +133,17 @@ export default function OfflineOrders() {
 
     const newOrder = {
       id: `TRX-OFF-${Date.now().toString().slice(-4)}`,
+      invoice: `TRX-OFF-${Date.now().toString().slice(-4)}`, // Ditambahkan properti invoice agar sinkron
       queueNumber: formattedQueue,
       customerName: customerName,
       date: new Date().toISOString().replace("T", " ").slice(0, 16),
       items: [...cart],
       totalAmount: total,
+      total: total, // Disamakan agar terbaca oleh modul Laporan Keuangan
       paymentMethod: paymentMethod,
       status: orderStatus
     };
 
-    // Jika saat checkout statusnya langsung Selesai, potong stok produk
     if (orderStatus === "Selesai") {
       const updatedProducts = products.map((prod) => {
         const cartItem = cart.find((item) => item.productId === prod.id);
@@ -168,7 +169,6 @@ export default function OfflineOrders() {
     setPrintModalOpen(true);
   };
 
-  // Fungsi Perubahan Status Fleksibel (Menunggu <-> Proses <-> Selesai) dengan Penyesuaian Stok
   const handleStatusChange = (orderId, newStatus) => {
     const targetOrder = orders.find(o => o.id === orderId);
     if (!targetOrder) return;
@@ -178,7 +178,6 @@ export default function OfflineOrders() {
 
     let updatedProducts = [...products];
 
-    // 1. Jika berubah menjadi "Selesai", potong stok produk di gudang
     if (oldStatus !== "Selesai" && newStatus === "Selesai") {
       updatedProducts = products.map((prod) => {
         const matchItem = targetOrder.items.find(i => i.productId === prod.id);
@@ -187,9 +186,7 @@ export default function OfflineOrders() {
         }
         return prod;
       });
-    }
-    // 2. Jika dari "Selesai" dikembalikan ke Proses/Menunggu, kembalikan stok produk
-    else if (oldStatus === "Selesai" && (newStatus === "Proses" || newStatus === "Menunggu")) {
+    } else if (oldStatus === "Selesai" && (newStatus === "Proses" || newStatus === "Menunggu")) {
       updatedProducts = products.map((prod) => {
         const matchItem = targetOrder.items.find(i => i.productId === prod.id);
         if (matchItem) {
@@ -206,7 +203,6 @@ export default function OfflineOrders() {
     );
     setOrders(updatedOrders);
 
-    // Jika diubah menjadi Selesai, tampilkan pop-up cetak struk
     if (newStatus === "Selesai") {
       const completedOrder = updatedOrders.find(o => o.id === orderId);
       setSelectedOrderForPrint(completedOrder);
@@ -344,7 +340,7 @@ export default function OfflineOrders() {
                       </div>
                     </td>
                     <td className="py-4 px-4 font-bold text-[#8D5B3A]">
-                      Rp {order.totalAmount.toLocaleString("id-ID")}
+                      Rp {(order.totalAmount || order.total).toLocaleString("id-ID")}
                     </td>
                     <td className="py-4 px-4">
                       <span className="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded-lg">
@@ -352,7 +348,6 @@ export default function OfflineOrders() {
                       </span>
                     </td>
                     <td className="py-4 px-4">
-                      {/* Dropdown status interaktif: Menunggu, Proses, Selesai */}
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
@@ -627,7 +622,7 @@ export default function OfflineOrders() {
               <div className="border-t border-dashed border-slate-300 my-2"></div>
               <div className="flex justify-between font-bold text-slate-900 text-sm">
                 <span>TOTAL:</span>
-                <span className="text-[#8D5B3A]">Rp {selectedOrderForPrint.totalAmount.toLocaleString("id-ID")}</span>
+                <span className="text-[#8D5B3A]">Rp {(selectedOrderForPrint.totalAmount || selectedOrderForPrint.total).toLocaleString("id-ID")}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Pembayaran:</span>
