@@ -15,8 +15,8 @@ import CategoryManagement from "./pages/admin/CategoryManagement";
 import ReportManagement from "./pages/admin/ReportManagement";
 import SupplierManagement from "./pages/admin/SupplierManagement";
 import OfflineOrders from "./pages/admin/OfflineOrders";
-import PurchaseReport from './pages/admin/PurchaseReport';
-import FinancialReport from './pages/admin/FinancialReport';
+import PurchaseReport from "./pages/admin/PurchaseReport";
+import FinancialReport from "./pages/admin/FinancialReport";
 import HomePelanggan from "./pages/pelanggan/HomePelanggan";
 
 export default function App() {
@@ -29,28 +29,36 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         {/* Rute Terproteksi Khusus Admin */}
+        <Route element={<ProtectedRoute allowedRoles={["pelanggan"]} />}>
+          <Route path="/pelanggan/homepelanggan" element={<HomePelanggan />} />
+        </Route>
         <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-          <Route path="/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/users" element={<UserManagement />} />
           <Route path="/produk" element={<ProductManagement />} />
           <Route path="/kategori" element={<CategoryManagement />} />
           <Route path="/supplier" element={<SupplierManagement />} />
           <Route path="/offlineorders" element={<OfflineOrders />} />
           {/* <Route path="/laporan" element={<ReportManagement />} /> */}
-          <Route path="/homepelanggan" element={<HomePelanggan />} />
-          
+
           {/* Rute Sub-menu Laporan untuk Admin */}
           <Route path="/laporan/penjualan" element={<ReportManagement />} />
           <Route path="/laporan/pembelian" element={<PurchaseReport />} />
           <Route path="/laporan/keuangan" element={<FinancialReport />} />
-          <Route path="/laporan" element={<Navigate to="/laporan/penjualan" replace />} />
+          <Route
+            path="/laporan"
+            element={<Navigate to="/laporan/penjualan" replace />}
+          />
         </Route>
         {/* Rute Terproteksi Khusus Owner */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
           {/* Rute Sub-menu Laporan untuk Owner */}
           <Route path="/laporan/penjualan" element={<ReportManagement />} />
           <Route path="/laporan/pembelian" element={<PurchaseReport />} />
-          <Route path="/laporan" element={<Navigate to="/laporan/penjualan" replace />} />
+          <Route
+            path="/laporan"
+            element={<Navigate to="/laporan/penjualan" replace />}
+          />
         </Route>
         {/* Fallback jika URL tidak ditemukan */}
         <Route path="*" element={<Navigate to="/" replace />} />

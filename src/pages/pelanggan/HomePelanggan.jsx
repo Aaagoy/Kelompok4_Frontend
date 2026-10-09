@@ -1,7 +1,10 @@
+import { LogOut } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function Home() {
+export default function HomePelanggan() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const navigate = useNavigate();
 
   const categories = [
     {
@@ -36,8 +39,16 @@ export default function Home() {
     },
   ];
 
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/homepage", { replace: true });
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      <h1>testosn</h1>
       {/* 1. NAVBAR HEADER */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -69,10 +80,20 @@ export default function Home() {
             >
               Contact
             </a>
+
+            <button
+              type="button"
+              className="flex cursor-pointer items-center gap-1 rounded-lg border border-[#FECDD3] bg-[#E11D48] p-2 font-mono text-sm text-[#FFFFFF] hover:bg-[#BE123C] hover:text-[#FFFFFF]"
+              onClick={handleLogout}
+            >
+              <span>
+                <LogOut size={17} />
+              </span>
+              Logout
+            </button>
           </nav>
         </div>
       </header>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
         {/* 2. HERO / PENAWARAN SECTION */}
         <section
@@ -262,7 +283,6 @@ export default function Home() {
           </div>
         </section>
       </main>
-
       <footer className="bg-white border-t border-slate-200 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
           &copy; {new Date().getFullYear()} NEW YORK Store. All rights reserved.

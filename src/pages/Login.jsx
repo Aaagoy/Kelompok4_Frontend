@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import axios from "axios";
 
-// Pastikan port & endpoint ini sesuai dengan backend Anda
+// Sesuaikan URL endpoint ini dengan backend Anda
 const API_LOGIN_URL = "http://localhost:3000/api/auth";
 
 export default function Login() {
@@ -19,7 +19,7 @@ export default function Login() {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setErrorMsg("Email dan password wajib diisi!");
       return;
     }
@@ -29,35 +29,56 @@ export default function Login() {
     try {
       // 1. Kirim request login ke backend
       const response = await axios.post(API_LOGIN_URL, {
-        email: email,
+        email: email.trim(),
         password: password,
       });
 
-      // 2. Ambil data balasan dari backend
-      // (Sesuaikan nama property 'token' dan 'user' dengan response backend Anda)
-      const { token, user } = response.data;
+      // 2. Ambil token & user data (Mendukung fallback struktur response)
+      const token = response.data.token || response.data.accessToken;
+      const user = response.data.user || response.data.data;
 
-      if (token) localStorage.setItem("token", token);
-
-      // Simpan data user ke localStorage
-      const role = user?.role ? user.role.toLowerCase() : "pelanggan";
-      localStorage.setItem("role", role);
-      if (user?.nama_user) localStorage.setItem("userName", user.nama_user);
-
-      // 3. NAVIGASI / REDIRECT BERDASARKAN ROLE
-      if (role === "admin") {
-        navigate("/admin/dashboard"); // Menuju dashboard admin
-      } else if (role === "owner") {
-        navigate("/admin/laporan"); // Menuju halaman laporan owner
-      } else {
-        navigate("/"); // Menuju homepage pelanggan
+      if (!token || !user) {
+        setErrorMsg("Format respons login dari server tidak valid.");
+        return;
       }
+      console.log(user);
+
+      // 3. Normalisasi Role
+      const role = String(user.Jabatan || "").toLowerCase();
+
+      // Jika akun ini bertipe Admin/Owner, cegah masuk lewat portal pelanggan
+      if (["admin", "owner"].includes(role)) {
+        setErrorMsg(
+          "Akun ini adalah akun staf. Silakan login melalui Portal Internal Admin.",
+        );
+        return;
+      }
+
+      // 4. Simpan Session ke localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", role || "pelanggan");
+
+      // Mengambil nama dari berbagai opsi nama field database
+      const userName =
+        user.nama_user || user.nama_lengkap || user.nama || user.name;
+      if (userName) {
+        localStorage.setItem("userName", userName);
+      }
+
+      // 5. Redirect ke Homepage Pelanggan (Sesuaikan path dengan App.jsx)
+      navigate("/pelanggan/homepelanggan", { replace: true });
     } catch (err) {
-      console.error("Login error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setErrorMsg(err.response.data.message);
+      console.error("Login pelanggan error:", err);
+      if (err.response) {
+        setErrorMsg(
+          err.response.data?.message ||
+            "Email atau password salah. Silakan coba lagi.",
+        );
       } else {
-        setErrorMsg("Email atau password salah / Gagal terhubung ke server.");
+        setErrorMsg(
+          "Gagal terhubung ke server. Pastikan backend telah berjalan.",
+        );
       }
     } finally {
       setIsLoading(false);
@@ -67,12 +88,11 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-3xl shadow-lg border border-amber-900/5 max-w-md w-full">
+        {/* Header Portal Pelanggan */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#3E2723]">
-            Masuk ke Portal Harafina
-          </h2>
+          <h2 className="text-2xl font-bold text-[#3E2723]">Masuk Pelanggan</h2>
           <p className="text-sm text-amber-900/60 mt-1">
-            Silakan masukkan akun Anda untuk melanjutkan
+            Silakan masuk dengan akun Harafina Anda
           </p>
         </div>
 
@@ -91,7 +111,7 @@ export default function Login() {
               <Mail className="w-5 h-5 absolute left-4 text-amber-900/40" />
               <input
                 type="email"
-                placeholder="nama@harafina.com"
+                placeholder="nama@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -133,7 +153,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2 cursor-pointer disabled:opacity-70"
+            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -149,15 +169,17 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-amber-900/70 mt-6">
-          Belum punya akun?{" "}
-          <Link
-            to="/register"
-            className="font-bold text-[#8D5B28] hover:underline"
-          >
-            Daftar di sini
-          </Link>
-        </p>
+        <div className="mt-6 pt-4 border-t border-amber-900/10 text-center space-y-2">
+          <p className="text-xs text-amber-900/70">
+            Belum punya akun?{" "}
+            <Link
+              to="/register"
+              className="font-bold text-[#8D5B28] hover:underline"
+            >
+              Daftar di sini
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

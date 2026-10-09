@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-// SESUAIKAN DENGAN PORT & ROUTE BACKEND KAMU
 const API_LOGIN_URL = "http://localhost:3000/api/auth";
 
 export default function AdminLogin() {
@@ -35,63 +34,55 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      // 1. Send Login Request ke Server Backend
       const response = await axios.post(API_LOGIN_URL, {
         email: email.trim(),
-        password,
+        password: password,
       });
 
-      // 2. Ambil token & user data (Mendukung fallback struktur response)
       const token = response.data.token || response.data.accessToken;
       const user = response.data.user || response.data.data;
 
       if (!token || !user) {
-        setErrorMsg("Format respons login dari server tidak valid.");
+        setErrorMsg("Data login dari server tidak lengkap.");
         return;
       }
 
-      // 3. Normalisasi Role
-      const role = String(user.role || "").toLowerCase();
+      const role = String(user.Jabatan || "")
+        // .trim()
+        .toLowerCase();
+      console.log(user);
 
-      // Cek apakah user memiliki hak akses internal
-      if (!["admin", "owner", "kasir"].includes(role)) {
-        setErrorMsg("Akun ini tidak memiliki hak akses portal internal.");
+      if (!["admin", "owner"].includes(role)) {
+        setErrorMsg("Akun ini tidak memiliki akses internal.");
         return;
       }
 
-      // 4. Simpan Session ke localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", role || "admin", role || "owner");
 
-      // Ambil nama dari berbagai kemungkinan nama field database
-      const userName =
-        user.nama_user || user.nama_lengkap || user.nama || user.name;
+      const userName = user.nama_user || user.nama || user.name;
+
       if (userName) {
         localStorage.setItem("userName", userName);
       }
 
-      // 5. Redirect Sesuai Role ke Route App.jsx
       if (role === "admin") {
-        navigate("/admin/dashboard", { replace: true });
+        navigate("/dashboard", { replace: true });
       } else if (role === "owner") {
-        navigate("/admin/laporan", { replace: true });
-      } else {
-        navigate("/admin/dashboard", { replace: true });
+        navigate("/laporan", { replace: true });
       }
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Login error:", err.response?.data || err.message);
 
       if (err.response) {
-        // Error dari server (misal HTTP 400, 401, 404)
         setErrorMsg(
           err.response.data?.message ||
-            "Login gagal. Silakan periksa email dan password Anda.",
+            "Login gagal. Periksa email dan password.",
         );
       } else {
-        // Error tidak bisa menghubungi server / CORS
         setErrorMsg(
-          "Tidak dapat terhubung ke server. Pastikan backend telah berjalan.",
+          "Tidak dapat terhubung ke server. Pastikan backend berjalan.",
         );
       }
     } finally {
