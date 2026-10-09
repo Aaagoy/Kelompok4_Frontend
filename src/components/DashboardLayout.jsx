@@ -26,14 +26,9 @@ export default function DashboardLayout({ children }) {
   ];
 
   return (
-<<<<<<< HEAD
-    <div className="flex h-screen bg-[#F5EFEA] font-sans">
-      {/* Memanggil Komponen Sidebar secara Reusable */}
-=======
     <div className="flex h-screen bg-[#F5EFEA] font-sans overflow-hidden">
       
       {/* Sidebar (Sudah responsif dengan drawer & overlay mobile) */}
->>>>>>> c7c6171bce66e69494213f34ca65e12163a19192
       <Sidebar menuItems={adminMenuItems} brandName="Harafina" />
 
       {/* KONTEN UTAMA */}
@@ -46,17 +41,12 @@ export default function DashboardLayout({ children }) {
               <Store size={22} />
             </div>
             <div>
-<<<<<<< HEAD
               <h1 className="text-lg font-bold text-[#3E2723] leading-none">
                 Harafina
               </h1>
               <p className="text-xs text-gray-400 mt-1">
                 "Toko Bahan Kue dan Dapur"
               </p>
-=======
-              <h1 className="text-base md:text-lg font-bold text-[#3E2723] leading-none">Harafina</h1>
-              <p className="text-[11px] md:text-xs text-gray-400 mt-1">"Toko Bahan Kue dan Dapur"</p>
->>>>>>> c7c6171bce66e69494213f34ca65e12163a19192
             </div>
           </div>
 
@@ -68,15 +58,9 @@ export default function DashboardLayout({ children }) {
               <span className="font-medium">Admin</span>
             </div>
 
-<<<<<<< HEAD
-            <button
-              onClick={() => navigate("/login")}
-              className="flex items-center gap-2 bg-[#8D5B28] hover:bg-[#724820] text-white text-xs font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm"
-=======
             <button 
               onClick={() => navigate('/login')}
               className="flex items-center gap-2 bg-[#8D5B28] hover:bg-[#724820] text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors shadow-sm cursor-pointer"
->>>>>>> c7c6171bce66e69494213f34ca65e12163a19192
             >
               <LogOut size={14} />
               <span className="hidden sm:inline">Logout</span>
