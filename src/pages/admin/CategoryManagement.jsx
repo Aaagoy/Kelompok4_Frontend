@@ -9,91 +9,52 @@ import {
   FolderTree,
   Layers,
 } from "lucide-react";
+import api from "../../services/api";
 
 export default function CategoryManagement() {
-  // Tab Aktif: 'kategori' atau 'subkategori'
   const [activeTab, setActiveTab] = useState("kategori");
-  const [category, setCategory] = useState([]);
-  const [subCategory, setSubCategory] = useState([]);
-  const [error, setError] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [nama, setNama] = useState("");
-  const [editId, setEditId] = useState(null);
-  const [formError, setFormError] = useState("");
-  const [saving, setSaving] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const [kategoriRes, subkategoriRes] = await Promise.all([
+        api.get("/kategori/kategori"),
+        // api.get("/subkategori"),
+      ]);
+
+      setCategories(
+        (kategoriRes.data.data ?? kategoriRes.data).map((item) => ({
+          ...item,
+          id: item.id_kategori ?? item.id,
+          nama: item.nama_kategori ?? item.nama,
+          deskripsi: item.deskripsi ?? "",
+        })),
+      );
+
+      setSubCategories(
+        (subkategoriRes.data.data ?? subkategoriRes.data).map((item) => ({
+          ...item,
+          id: item.id_subkategori ?? item.id,
+          kategoriId: item.id_kategori ?? item.kategoriId,
+          nama: item.nama_subkategori ?? item.nama,
+          deskripsi: item.deskripsi ?? "",
+        })),
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengambil data kategori.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
- async function loadData() {
- try {
- setLoading(true);
- setError("");
- const response = await getKategori();
- setItems(response.data);
- } catch {
- setError("Gagal memuat data kategori.");
- } finally {
- setLoading(false);
- }
- }
-
-
-  // State Kategori Utama (dengan localStorage)
-  // const [categories, setCategories] = useState(() => {
-  //   const saved = localStorage.getItem("categories_data");
-  //   if (saved) return JSON.parse(saved);
-  //   return [
-  //     {
-  //       id: 1,
-  //       nama: "Pemanis & Gula",
-  //       deskripsi: "Produk pemanis alami dan gula organik",
-  //     },
-  //     {
-  //       id: 2,
-  //       nama: "Tepung & Biji-bijian",
-  //       deskripsi: "Aneka jenis tepung kue dan biji-bijian",
-  //     },
-  //     {
-  //       id: 3,
-  //       nama: "Bahan Roti & Kue",
-  //       deskripsi: "Pengembang, ragi, dan perisa makanan",
-  //     },
-  //   ];
-  // });
-
-  // // State Sub-Kategori (dengan localStorage)
-  // const [subCategories, setSubCategories] = useState(() => {
-  //   const saved = localStorage.getItem("subcategories_data");
-  //   if (saved) return JSON.parse(saved);
-  //   return [
-  //     {
-  //       id: 1,
-  //       kategoriId: 1,
-  //       nama: "Gula Semut",
-  //       deskripsi: "Sub-kategori gula semut aren & kelapa",
-  //     },
-  //     {
-  //       id: 2,
-  //       kategoriId: 2,
-  //       nama: "Tepung Terigu",
-  //       deskripsi: "Berbagai merk tepung terigu protein",
-  //     },
-  //     {
-  //       id: 3,
-  //       kategoriId: 3,
-  //       nama: "Ragi Instan",
-  //       deskripsi: "Ragi roti kering aktif",
-  //     },
-  //   ];
-  // });
-
-  useEffect(() => {
-    localStorage.setItem("categories_data", JSON.stringify(categories));
-  }, [categories]);
-
-  useEffect(() => {
-    localStorage.setItem("subcategories_data", JSON.stringify(subCategories));
-  }, [subCategories]);
+    fetchData();
+  }, []);
 
   // Search & Modal States
   const [searchTerm, setSearchTerm] = useState("");
@@ -125,60 +86,45 @@ export default function CategoryManagement() {
   });
 
   // Handle Submit Form (Tambah / Edit)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.nama) return;
 
-    if (activeTab === "kategori") {
-      if (editingId) {
-        setCategories(
-          categories.map((c) =>
-            c.id === editingId
-              ? { ...c, nama: formData.nama, deskripsi: formData.deskripsi }
-              : c,
-          ),
-        );
-      } else {
-        const newCat = {
-          id:
-            categories.length > 0
-              ? Math.max(...categories.map((c) => c.id)) + 1
-              : 1,
-          nama: formData.nama,
+    if (!formData.nama.trim()) return;
+
+    try {
+      if (activeTab === "kategori") {
+        const payload = {
+          nama_kategori: formData.nama,
           deskripsi: formData.deskripsi,
         };
-        setCategories([...categories, newCat]);
-      }
-    } else {
-      if (!formData.kategoriId) return;
-      if (editingId) {
-        setSubCategories(
-          subCategories.map((sc) =>
-            sc.id === editingId
-              ? {
-                  ...sc,
-                  nama: formData.nama,
-                  kategoriId: Number(formData.kategoriId),
-                  deskripsi: formData.deskripsi,
-                }
-              : sc,
-          ),
-        );
+
+        if (editingId) {
+          await api.put(`/kategori${editingId}`, payload);
+        } else {
+          await api.post("/kategori", payload);
+        }
       } else {
-        const newSub = {
-          id:
-            subCategories.length > 0
-              ? Math.max(...subCategories.map((s) => s.id)) + 1
-              : 1,
-          kategoriId: Number(formData.kategoriId),
-          nama: formData.nama,
+        if (!formData.kategoriId) return;
+
+        const payload = {
+          id_kategori: Number(formData.kategoriId),
+          nama_subkategori: formData.nama,
           deskripsi: formData.deskripsi,
         };
-        setSubCategories([...subCategories, newSub]);
+
+        if (editingId) {
+          await api.put(`/subkategori/${editingId}`, payload);
+        } else {
+          await api.post("/subkategori", payload);
+        }
       }
+
+      await fetchData();
+      closeModal();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Gagal menyimpan data.");
     }
-
-    closeModal();
   };
 
   const openAddModal = () => {
@@ -215,22 +161,25 @@ export default function CategoryManagement() {
     setFormData({ nama: "", kategoriId: "", deskripsi: "" });
   };
 
-  const handleDelete = (id) => {
-    if (activeTab === "kategori") {
-      if (
-        window.confirm(
-          "Menghapus kategori utama juga dapat memengaruhi sub-kategori terkait. Lanjutkan?",
-        )
-      ) {
-        setCategories(categories.filter((c) => c.id !== id));
-        setSubCategories(subCategories.filter((sc) => sc.kategoriId !== id));
+  const handleDelete = async (id) => {
+    const message =
+      activeTab === "kategori"
+        ? "Menghapus kategori utama dapat memengaruhi sub-kategori terkait. Lanjutkan?"
+        : "Apakah Anda yakin ingin menghapus sub-kategori ini?";
+
+    if (!window.confirm(message)) return;
+
+    try {
+      if (activeTab === "kategori") {
+        await api.delete(`/kategori/${id}`);
+        // } else {
+        //   await api.delete(`/subkategori/${id}`);
       }
-    } else {
-      if (
-        window.confirm("Apakah Anda yakin ingin menghapus sub-kategori ini?")
-      ) {
-        setSubCategories(subCategories.filter((sc) => sc.id !== id));
-      }
+
+      await fetchData();
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Gagal menghapus data.");
     }
   };
 
@@ -321,7 +270,10 @@ export default function CategoryManagement() {
 
         {/* Tabel Data */}
         <div className="overflow-x-auto">
-          {activeTab === "kategori" ? (
+          {loading ? (
+            <div className="p-8 text-center text-slate-500">Memuat data...</div>
+          ) : activeTab === "kategori" ? (
+            // {activeTab === "kategori" ? (
             <table className="w-full text-left text-sm">
               <thead className="bg-[#F5EFEA] text-slate-600 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
                 <tr>

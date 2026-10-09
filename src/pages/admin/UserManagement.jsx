@@ -4,29 +4,21 @@ import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
 
 export default function UserManagement() {
   const [editingUser, setEditingUser] = useState(null);
-  // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
-  const [users, setUsers] = useState(() => {
-    const savedUsers = localStorage.getItem("users_data");
-    if (savedUsers) {
-      return JSON.parse(savedUsers);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await getUser();
+      setUsers(response.data);
+    } catch {
+      setError("Gagal memuat data user.");
+    } finally {
+      setLoading(false);
     }
-    return [
-      { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
-      {
-        id: 2,
-        name: "Hendra Wijaya",
-        email: "owner@harafina.com",
-        role: "Owner",
-      },
-      {
-        id: 3,
-        name: "Rudi Hartono",
-        email: "rudi@harafina.com",
-        role: "Pelanggan",
-      },
-    ];
-  });
-
+  };
   // Simpan ke localStorage setiap kali ada perubahan pada state users
   useEffect(() => {
     localStorage.setItem("users_data", JSON.stringify(users));
