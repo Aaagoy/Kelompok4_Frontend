@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import axios from "axios";
 
-const Login = () => {
+// Pastikan port & endpoint ini sesuai dengan backend Anda
+const API_LOGIN_URL = "http://localhost:3000/api/auth";
+
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
 
@@ -18,34 +24,43 @@ const Login = () => {
       return;
     }
 
-    // Ambil data users dari localStorage atau gunakan default bawaan sistem
-    const existingUsers = JSON.parse(localStorage.getItem("users_data")) || [
-      { id: 1, name: "Admin", email: "admin@harafina.com", role: "admin" },
-      { id: 2, name: "Hendra Wijaya", email: "owner@harafina.com", role: "owner" },
-      { id: 3, name: "Rudi Hartono", email: "rudi@harafina.com", role: "kasir" }
-    ];
+    setIsLoading(true);
 
-    // Cek apakah email terdaftar di sistem
-    const foundUser = existingUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    try {
+      // 1. Kirim request login ke backend
+      const response = await axios.post(API_LOGIN_URL, {
+        email: email,
+        password: password,
+      });
 
-    if (!foundUser) {
-      setErrorMsg("Email tidak ditemukan. Silakan daftar terlebih dahulu.");
-      return;
-    }
+      // 2. Ambil data balasan dari backend
+      // (Sesuaikan nama property 'token' dan 'user' dengan response backend Anda)
+      const { token, user } = response.data;
 
-    // Simpan token, role, dan nama user ke localStorage
-    localStorage.setItem("token", "dummy-token-harafina");
-    const userRole = foundUser.role ? foundUser.role.toLowerCase() : "user";
-    localStorage.setItem("role", userRole);
-    localStorage.setItem("userName", foundUser.name);
+      if (token) localStorage.setItem("token", token);
 
-    // Redirect berdasarkan role masing-sama:
-    if (userRole === "admin") {
-      navigate("/dashboard"); // Menuju dashboard admin
-    } else if (userRole === "owner") {
-      navigate("/laporan"); // Menuju halaman laporan owner (pastikan rute ini ada di App.jsx)
-    } else {
-      navigate("/"); // Menuju homepage untuk user biasa/kasir
+      // Simpan data user ke localStorage
+      const role = user?.role ? user.role.toLowerCase() : "pelanggan";
+      localStorage.setItem("role", role);
+      if (user?.nama_user) localStorage.setItem("userName", user.nama_user);
+
+      // 3. NAVIGASI / REDIRECT BERDASARKAN ROLE
+      if (role === "admin") {
+        navigate("/admin/dashboard"); // Menuju dashboard admin
+      } else if (role === "owner") {
+        navigate("/admin/laporan"); // Menuju halaman laporan owner
+      } else {
+        navigate("/"); // Menuju homepage pelanggan
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      if (err.response && err.response.data && err.response.data.message) {
+        setErrorMsg(err.response.data.message);
+      } else {
+        setErrorMsg("Email atau password salah / Gagal terhubung ke server.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,7 +95,8 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#FAF8F5] border border-amber-900/10 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all"
+                disabled={isLoading}
+                className="w-full bg-[#FAF8F5] border border-amber-900/10 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all disabled:opacity-60"
               />
             </div>
           </div>
@@ -97,7 +113,8 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-[#FAF8F5] border border-amber-900/10 rounded-2xl pl-12 pr-12 py-3.5 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all"
+                disabled={isLoading}
+                className="w-full bg-[#FAF8F5] border border-amber-900/10 rounded-2xl pl-12 pr-12 py-3.5 text-sm text-[#3E2723] focus:outline-none focus:ring-2 focus:ring-[#8D6E63] transition-all disabled:opacity-60"
               />
               <button
                 type="button"
@@ -115,22 +132,33 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2 cursor-pointer"
+            disabled={isLoading}
+            className="w-full bg-[#8D5B28] hover:bg-[#6D421E] text-white font-medium py-3.5 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg mt-2 cursor-pointer disabled:opacity-70"
           >
-            <span>Masuk Sekarang</span>
-            <ArrowRight className="w-4 h-4" />
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Memproses...</span>
+              </>
+            ) : (
+              <>
+                <span>Masuk Sekarang</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </form>
 
         <p className="text-center text-xs text-amber-900/70 mt-6">
           Belum punya akun?{" "}
-          <Link to="/register" className="font-bold text-[#8D5B28] hover:underline">
+          <Link
+            to="/register"
+            className="font-bold text-[#8D5B28] hover:underline"
+          >
             Daftar di sini
           </Link>
         </p>
       </div>
     </div>
   );
-};
-
-export default Login;
+}

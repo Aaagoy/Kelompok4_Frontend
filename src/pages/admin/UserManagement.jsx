@@ -1,28 +1,16 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
-import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, User, X, Loader2 } from "lucide-react";
+import axios from "axios";
+
+// Sesuaikan URL endpoint ini dengan backend Anda
+const API_URL = "http://localhost:3000/api/auth";
 
 export default function UserManagement() {
-  const [editingUser, setEditingUser] = useState(null);
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const response = await getUser();
-      setUsers(response.data);
-    } catch {
-      setError("Gagal memuat data user.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  // Simpan ke localStorage setiap kali ada perubahan pada state users
-  useEffect(() => {
-    localStorage.setItem("users_data", JSON.stringify(users));
-  }, [users]);
+  const [editingUser, setEditingUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [activeTab, setActiveTab] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,14 +21,32 @@ export default function UserManagement() {
     role: "Admin",
   });
 
-  // Fungsi untuk menentukan warna badge berdasarkan role
+  // 1. Fetch Data dari Database saat Komponen Dimuat
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_URL);
+      setUsers(response.data);
+    } catch (err) {
+      console.error("Gagal mengambil data user:", err);
+      setError("Gagal memuat data dari server.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const getRoleBadgeClass = (role) => {
     switch (role) {
-      case "Admin":
+      case "admin":
         return "bg-blue-100 text-blue-600";
-      case "Owner":
+      case "owner":
         return "bg-purple-100 text-purple-600";
-      case "Pelanggan":
+      case "pelanggan":
         return "bg-emerald-100 text-emerald-600";
       default:
         return "bg-gray-100 text-gray-600";
@@ -50,38 +56,67 @@ export default function UserManagement() {
   const filteredUsers = users.filter((u) => {
     const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
+      u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
-  // Fungsi Buka Modal untuk Tambah Baru
   const handleOpenAddModal = () => {
     setEditingUser(null);
-    setFormData({ name: "", email: "", role: "Admin" });
+    setFormData({
+      nama_user: "",
+      email: "",
+      role: "Admin",
+    });
     setIsModalOpen(true);
   };
 
-  // Fungsi Buka Modal untuk Edit User
   const handleOpenEditModal = (user) => {
     setEditingUser(user);
-    setFormData({ name: user.name, email: user.email, role: user.role });
+    setFormData({
+      nama_user: user.nama_user,
+      email: user.email,
+      role: user.role,
+    });
     setIsModalOpen(true);
   };
 
-  // Handle Submit (bisa untuk Tambah maupun Edit)
-  const handleSubmitUser = (e) => {
+  // 2. Handle Tambah & Edit Data ke Database
+  const handleSubmitUser = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) return;
+    if (!formData.nama_user || !formData.email) return;
 
-    setUsers([...users, { id: Date.now(), ...formData }]);
-    setFormData({ name: "", email: "", role: "Admin" });
-    setIsModalOpen(false);
+    try {
+      if (editingUser) {
+        // HTTP PUT / PATCH untuk Update
+        await axios.put(`${API_URL}/${editingUser.id}`, formData);
+      } else {
+        // HTTP POST untuk Tambah Baru
+        await axios.post(API_URL, formData);
+      }
+      setIsModalOpen(false);
+      setFormData({
+        nama_user: "",
+        email: "",
+        role: "admin",
+      });
+      fetchUsers(); // Refresh data dari DB
+    } catch (err) {
+      console.error("Gagal menyimpan data user:", err);
+      alert("Terjadi kesalahan saat menyimpan data.");
+    }
   };
 
-  const handleDelete = (id) => {
+  // 3. Handle Hapus Data dari Database
+  const handleDelete = async (id) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus user ini?")) {
-      setUsers(users.filter((u) => u.id !== id));
+      try {
+        await axios.delete(`${API_URL}/${id}`);
+        fetchUsers(); // Refresh data setelah hapus
+      } catch (err) {
+        console.error("Gagal menghapus user:", err);
+        alert("Gagal menghapus data dari server.");
+      }
     }
   };
 
@@ -152,9 +187,27 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
-              {filteredUsers.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    <div className="flex justify-center items-center gap-2">
+                      <Loader2 className="animate-spin" size={18} />
+                      <span>Memuat data dari database...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td
+                    colSpan="5"
+                    className="py-6 text-center text-rose-500 font-medium"
+                  >
+                    {error}
+                  </td>
+                </tr>
+              ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user, index) => (
-                  <tr key={user.id} className="hover:bg-gray-50/50">
+                  <tr key={user.id || index} className="hover:bg-gray-50/50">
                     <td className="py-4 px-6 text-gray-400">{index + 1}</td>
                     <td className="py-4 px-6 font-semibold">
                       <div className="flex items-center gap-3">
@@ -167,7 +220,9 @@ export default function UserManagement() {
                     <td className="py-4 px-6 text-gray-500">{user.email}</td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(user.role)}`}
+                        className={`px-3 py-1 rounded-lg text-[10px] font-bold ${getRoleBadgeClass(
+                          user.role,
+                        )}`}
                       >
                         {user.role}
                       </span>
@@ -210,7 +265,7 @@ export default function UserManagement() {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-800 text-sm">
-                Tambah User Baru
+                {editingUser ? "Edit User" : "Tambah User Baru"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
