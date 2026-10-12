@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 
-const API_LOGIN_URL = "http://localhost:3000/api/auth";
+const API_LOGIN_URL = "http://localhost:3000/admin/login";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -68,7 +68,7 @@ export default function AdminLogin() {
       }
 
       if (role === "admin") {
-        navigate("/dashboard", { replace: true });
+        navigate("/admin/dashboard", { replace: true });
       } else if (role === "owner") {
         navigate("/laporan", { replace: true });
       }
