@@ -14,9 +14,11 @@ import ProductManagement from './pages/admin/ProductManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 import ReportManagement from './pages/admin/ReportManagement';
 import PurchaseReport from './pages/admin/PurchaseReport';
+import PurchaseTransaction from './pages/admin/PurchaseTransaction';
 import FinancialReport from './pages/admin/FinancialReport';
 import SupplierManagement from './pages/admin/SupplierManagement';
 import OfflineOrders from './pages/admin/OfflineOrders';
+// Import komponen transaksi penjualan jika sudah ada (misal: ReportTransaction / SalesTransaction)
 
 export default function App() {
   return (
@@ -42,6 +44,11 @@ export default function App() {
           <Route path="/laporan/pembelian" element={<PurchaseReport />} />
           <Route path="/laporan/keuangan" element={<FinancialReport />} />
           <Route path="/laporan" element={<Navigate to="/laporan/penjualan" replace />} />
+
+          {/* Rute Sub-menu Transaksi untuk Admin */}
+          <Route path="/transaksi/penjualan" element={<OfflineOrders />} />
+          <Route path="/transaksi/pembelian" element={<PurchaseTransaction />} />
+          <Route path="/transaksi" element={<Navigate to="/transaksi/penjualan" replace />} />
         </Route>
 
         {/* Rute Terproteksi Khusus Owner */}

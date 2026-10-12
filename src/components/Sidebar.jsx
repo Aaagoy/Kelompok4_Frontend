@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronUp, BarChart3, ShoppingCart } from "lucide-react";
 
 const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Inisialisasi state agar langsung terbuka jika URL aktif mengandung "/laporan"
+  // Inisialisasi state agar langsung terbuka jika URL aktif mengandung "/laporan" atau "/transaksi"
   const [isReportOpen, setIsReportOpen] = useState(
     location.pathname.includes("/laporan")
+  );
+  const [isTransactionOpen, setIsTransactionOpen] = useState(
+    location.pathname.includes("/transaksi")
   );
 
   return (
@@ -71,6 +74,58 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
           {/* Navigasi Dinamis */}
           <nav className="space-y-1">
             {menuItems.map((item) => {
+              // Jika menu adalah Transaksi, buatkan dropdown sub-menu
+              if (item.name.toLowerCase() === "transaksi" || item.path === "/transaksi") {
+                const isTransactionActive = location.pathname.includes("/transaksi");
+
+                return (
+                  <div key="menu-transaksi">
+                    <button
+                      onClick={() => setIsTransactionOpen(!isTransactionOpen)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                        isTransactionActive
+                          ? "bg-[#8D5B28] text-white shadow-sm font-semibold"
+                          : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShoppingCart className="w-4 h-4 shrink-0" />
+                        <span className="truncate">Transaksi</span>
+                      </div>
+                      {isTransactionOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+
+                    {/* Sub-menu Dropdown Transaksi */}
+                    {isTransactionOpen && (
+                      <div className="pl-7 pr-1 py-1 space-y-1 mt-1 border-l border-white/10 ml-4">
+                        <Link
+                          to="/transaksi/penjualan"
+                          onClick={() => setIsOpen(false)}
+                          className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
+                            location.pathname === "/transaksi/penjualan"
+                              ? "bg-[#8D5B28] text-white font-semibold"
+                              : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
+                          }`}
+                        >
+                          Transaksi Penjualan
+                        </Link>
+                        <Link
+                          to="/transaksi/pembelian"
+                          onClick={() => setIsOpen(false)}
+                          className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
+                            location.pathname === "/transaksi/pembelian"
+                              ? "bg-[#8D5B28] text-white font-semibold"
+                              : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
+                          }`}
+                        >
+                          Transaksi Pembelian
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               // Jika menu adalah Laporan, buatkan dropdown sub-menu
               if (item.name.toLowerCase() === "laporan" || item.path === "/laporan") {
                 const isReportActive = location.pathname.includes("/laporan");
@@ -92,7 +147,7 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                       {isReportOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
 
-                    {/* Sub-menu Dropdown */}
+                    {/* Sub-menu Dropdown Laporan */}
                     {isReportOpen && (
                       <div className="pl-7 pr-1 py-1 space-y-1 mt-1 border-l border-white/10 ml-4">
                         <Link
