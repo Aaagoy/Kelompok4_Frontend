@@ -18,7 +18,7 @@ import OfflineOrders from "./pages/admin/OfflineOrders";
 import PurchaseReport from "./pages/admin/PurchaseReport";
 import FinancialReport from "./pages/admin/FinancialReport";
 import HomePelanggan from "./pages/pelanggan/HomePelanggan";
-import PurchaseTransaction from './pages/admin/PurchaseTransaction';
+import PurchaseTransaction from "./pages/admin/PurchaseTransaction";
 // Import komponen transaksi penjualan jika sudah ada (misal: ReportTransaction / SalesTransaction)
 
 export default function App() {
@@ -47,12 +47,21 @@ export default function App() {
           <Route path="/laporan/penjualan" element={<ReportManagement />} />
           <Route path="/laporan/pembelian" element={<PurchaseReport />} />
           <Route path="/laporan/keuangan" element={<FinancialReport />} />
-          <Route path="/laporan" element={<Navigate to="/laporan/penjualan" replace />} />
+          <Route
+            path="/laporan"
+            element={<Navigate to="/laporan/penjualan" replace />}
+          />
 
           {/* Rute Sub-menu Transaksi untuk Admin */}
           <Route path="/transaksi/penjualan" element={<OfflineOrders />} />
-          <Route path="/transaksi/pembelian" element={<PurchaseTransaction />} />
-          <Route path="/transaksi" element={<Navigate to="/transaksi/penjualan" replace />} />
+          <Route
+            path="/transaksi/pembelian"
+            element={<PurchaseTransaction />}
+          />
+          <Route
+            path="/transaksi"
+            element={<Navigate to="/transaksi/penjualan" replace />}
+          />
         </Route>
         {/* Rute Terproteksi Khusus Owner */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>

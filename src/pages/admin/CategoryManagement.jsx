@@ -12,16 +12,22 @@ import {
 import api from "../../services/api";
 
 export default function CategoryManagement() {
-  const [activeTab, setActiveTab] = useState("kategori");
+  const [
+    activeTab,
+    // setActiveTab
+  ] = useState("kategori");
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
+  const [
+    subCategories,
+    // ?  setSubCategories
+  ] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      const [kategoriRes, subkategoriRes] = await Promise.all([
+      const [kategoriRes] = await Promise.all([
         api.get("/kategori/kategori"),
         // api.get("/subkategori"),
       ]);
@@ -30,23 +36,10 @@ export default function CategoryManagement() {
         (kategoriRes.data.data ?? kategoriRes.data).map((item) => ({
           ...item,
           id: item.id_kategori ?? item.id,
-          nama: item.nama_kategori ?? item.nama,
+          nama: item.nama_kategori ?? item.nama_kategori,
           deskripsi: item.deskripsi ?? "",
         })),
       );
-
-      setSubCategories(
-        (subkategoriRes.data.data ?? subkategoriRes.data).map((item) => ({
-          ...item,
-          id: item.id_subkategori ?? item.id,
-          kategoriId: item.id_kategori ?? item.kategoriId,
-          nama: item.nama_subkategori ?? item.nama,
-          deskripsi: item.deskripsi ?? "",
-        })),
-      );
-    } catch (error) {
-      console.error(error);
-      alert("Gagal mengambil data kategori.");
     } finally {
       setLoading(false);
     }
@@ -201,38 +194,6 @@ export default function CategoryManagement() {
         >
           <Plus size={18} />
           {activeTab === "kategori" ? "Tambah Kategori" : "Tambah Sub-Kategori"}
-        </button>
-      </div>
-
-      {/* Tab Navigasi Kategori / Sub-Kategori */}
-      <div className="flex gap-2 mb-6 border-b border-slate-200 pb-3">
-        <button
-          onClick={() => {
-            setActiveTab("kategori");
-            setSearchTerm("");
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "kategori"
-              ? "bg-[#8D5B3A] text-white shadow-sm"
-              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-          }`}
-        >
-          <FolderTree size={16} />
-          <span>Kategori Utama ({categories.length})</span>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("subkategori");
-            setSearchTerm("");
-          }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "subkategori"
-              ? "bg-[#8D5B3A] text-white shadow-sm"
-              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-          }`}
-        >
-          <Layers size={16} />
-          <span>Sub-Kategori ({subCategories.length})</span>
         </button>
       </div>
 
