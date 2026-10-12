@@ -8,6 +8,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import Register from "./pages/Register";
 
 // Halaman Admin
+<<<<<<< HEAD
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import ProductManagement from "./pages/admin/ProductManagement";
@@ -18,6 +19,19 @@ import OfflineOrders from "./pages/admin/OfflineOrders";
 import PurchaseReport from "./pages/admin/PurchaseReport";
 import FinancialReport from "./pages/admin/FinancialReport";
 import HomePelanggan from "./pages/pelanggan/HomePelanggan";
+=======
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UserManagement from './pages/admin/UserManagement';
+import ProductManagement from './pages/admin/ProductManagement';
+import CategoryManagement from './pages/admin/CategoryManagement';
+import ReportManagement from './pages/admin/ReportManagement';
+import PurchaseReport from './pages/admin/PurchaseReport';
+import PurchaseTransaction from './pages/admin/PurchaseTransaction';
+import FinancialReport from './pages/admin/FinancialReport';
+import SupplierManagement from './pages/admin/SupplierManagement';
+import OfflineOrders from './pages/admin/OfflineOrders';
+// Import komponen transaksi penjualan jika sudah ada (misal: ReportTransaction / SalesTransaction)
+>>>>>>> e62c90adbad7717c3942690fcf82177b75fc2f63
 
 export default function App() {
   return (
@@ -45,10 +59,19 @@ export default function App() {
           <Route path="/laporan/penjualan" element={<ReportManagement />} />
           <Route path="/laporan/pembelian" element={<PurchaseReport />} />
           <Route path="/laporan/keuangan" element={<FinancialReport />} />
+<<<<<<< HEAD
           <Route
             path="/laporan"
             element={<Navigate to="/laporan/penjualan" replace />}
           />
+=======
+          <Route path="/laporan" element={<Navigate to="/laporan/penjualan" replace />} />
+
+          {/* Rute Sub-menu Transaksi untuk Admin */}
+          <Route path="/transaksi/penjualan" element={<OfflineOrders />} />
+          <Route path="/transaksi/pembelian" element={<PurchaseTransaction />} />
+          <Route path="/transaksi" element={<Navigate to="/transaksi/penjualan" replace />} />
+>>>>>>> e62c90adbad7717c3942690fcf82177b75fc2f63
         </Route>
         {/* Rute Terproteksi Khusus Owner */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>

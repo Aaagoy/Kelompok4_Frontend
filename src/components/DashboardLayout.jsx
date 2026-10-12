@@ -7,7 +7,8 @@ import {
   Store,
   Truck,
   BarChart3,
-  ShoppingBag
+  ShoppingBag,
+  ShoppingCart
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children }) {
 
   const adminMenuItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Transaksi', icon: ShoppingCart, path: '/transaksi' }, // <-- Ditambahkan di sini
     { name: 'Pesanan Offline', icon: ShoppingBag, path: '/offlineorders' },
     { name: 'Produk', icon: Package, path: '/produk' },
     { name: 'Kategori', icon: Tags, path: '/kategori' },

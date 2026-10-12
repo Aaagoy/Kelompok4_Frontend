@@ -13,60 +13,94 @@ import {
 } from "lucide-react";
 
 export default function AdminDashboard() {
-  // State untuk mengambil data produk dari localStorage
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
+  const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem("products_data");
-    if (savedProducts) {
-      setProducts(JSON.parse(savedProducts));
-    }
-  }, []);
-
-  // Hitung metrik dinamis khusus Toko Bahan Kue
-  const totalProduk = products.length;
-  
-  // Stok Kritis (stok <= 5)
-  const stokKritis = products.filter((p) => Number(p.stok) <= 5);
-
-  // Tanggal Sistem Hari Ini: 8 Oktober 2026
-  const today = new Date("2026-10-08");
-  const expiringSoon = products.filter((p) => {
-    if (!p.expiryDate) return false;
-    const expDate = new Date(p.expiryDate);
-    const diffTime = expDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays <= 30;
+    return savedProducts ? JSON.parse(savedProducts) : [];
   });
 
+  const [offlineOrders, setOfflineOrders] = useState(() => {
+    const savedOfflineOrders = localStorage.getItem("offline_orders_data");
+    return savedOfflineOrders ? JSON.parse(savedOfflineOrders) : [];
+  });
+
+  // Sinkronisasi otomatis dari localStorage secara real-time
+  useEffect(() => {
+    const loadData = () => {
+      const savedProducts = localStorage.getItem("products_data");
+      if (savedProducts) {
+        setProducts(JSON.parse(savedProducts));
+      }
+
+      const savedOfflineOrders = localStorage.getItem("offline_orders_data");
+      if (savedOfflineOrders) {
+        setOfflineOrders(JSON.parse(savedOfflineOrders));
+      }
+    };
+
+    loadData();
+
+    window.addEventListener("storage", loadData);
+    return () => window.removeEventListener("storage", loadData);
+  }, []);
+
+  const checkExpiryStatus = (dateString) => {
+    if (!dateString) return { status: 'safe', label: 'Tidak ada info' };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiry = new Date(dateString);
+    expiry.setHours(0, 0, 0, 0);
+
+    const diffTime = expiry - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { status: 'expired', label: 'Kadaluarsa!' };
+    } else if (diffDays <= 30) {
+      return { status: 'warning', label: `Segera Exp (${diffDays} hari)` };
+    } else {
+      return { status: 'safe', label: 'Aman' };
+    }
+  };
+
+  const totalProduk = products.length;
+
+  // DIPERBAIKI: Disamakan dengan aturan ProductManagement (Stok > 0 dan <= 10 atau berstatus Stok Menipis)
+  const stokKritis = products.filter((p) => {
+    const isWithdrawn = p.manualStatus === 'Produk Ditarik';
+    const currentStatus = p.manualStatus || (Number(p.stok) > 10 ? "Tersedia" : Number(p.stok) > 0 ? "Stok Menipis" : "Habis");
+    return !isWithdrawn && (currentStatus === "Stok Menipis" || currentStatus === "Habis" || Number(p.stok) <= 10);
+  });
+  
+  const expiringSoon = products.filter((p) => {
+    if (!p.expiryDate) return false;
+    const { status } = checkExpiryStatus(p.expiryDate);
+    return status === 'expired' || status === 'warning';
+  });
+
+  const totalOfflineSelesai = offlineOrders.filter((o) => o.status === "Selesai").length;
+
   const [searchTerm, setSearchTerm] = useState("");
+  
   const transactions = [
+    ...offlineOrders.map((o) => ({
+      id: o.id,
+      date: o.date,
+      type: "Offline",
+      customer: o.customerName,
+      total: `Rp ${(o.totalAmount || o.total || 0).toLocaleString("id-ID")}`,
+      method: o.paymentMethod,
+      status: o.status,
+    })),
     {
-      id: "TRX-20261008-001",
-      date: "08/10/2026 09:15",
+      id: "TRX-20261009-001",
+      date: "09/10/2026 09:15",
       type: "Online",
       customer: "Siska (Web)",
       total: "Rp 128.000",
       method: "QRIS",
       status: "Dikemas",
-    },
-    {
-      id: "TRX-20261008-002",
-      date: "08/10/2026 10:32",
-      type: "Offline",
-      customer: "Pelanggan Umum",
-      total: "Rp 45.000",
-      method: "Tunai",
-      status: "Selesai",
-    },
-    {
-      id: "TRX-20261008-003",
-      date: "08/10/2026 11:05",
-      type: "Online",
-      customer: "Andi Saputra",
-      total: "Rp 164.000",
-      method: "Transfer",
-      status: "Selesai",
     },
   ];
 
@@ -118,7 +152,7 @@ export default function AdminDashboard() {
               <Store size={18} />
             </div>
           </div>
-          <p className="text-2xl font-extrabold text-gray-900 mb-2">45</p>
+          <p className="text-2xl font-extrabold text-gray-900 mb-2">{totalOfflineSelesai}</p>
           <p className="text-[11px] text-emerald-600 font-medium">
             <span className="font-bold">Selesai</span> di Toko Fisik
           </p>
@@ -138,7 +172,7 @@ export default function AdminDashboard() {
             {stokKritis.length} <span className="text-xs font-normal text-gray-500">Item</span>
           </p>
           <p className="text-[11px] text-amber-600 font-medium">
-            Stok ≤ 5 / Habis
+            Stok ≤ 10 / Menipis
           </p>
         </div>
 
@@ -174,7 +208,7 @@ export default function AdminDashboard() {
                 <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-amber-50/40 rounded-xl">
                   <span className="font-semibold text-gray-800">{item.nama}</span>
                   <span className="bg-amber-200/60 text-amber-900 px-2 py-0.5 rounded-md font-bold">
-                    Sisa: {item.stok}
+                    Sisa: {item.stok} {item.satuan || "pcs"}
                   </span>
                 </div>
               ))}
@@ -188,18 +222,21 @@ export default function AdminDashboard() {
         <div className="bg-white rounded-2xl border border-rose-100 p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4 text-rose-800 font-bold text-sm">
             <Clock size={16} />
-            <h4>Bahan Mendekati Kadaluwarsa ({expiringSoon.length})</h4>
+            <h4>Bahan Mendekati / Sudah Kadaluwarsa ({expiringSoon.length})</h4>
           </div>
           {expiringSoon.length > 0 ? (
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {expiringSoon.map((item) => (
-                <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-rose-50/40 rounded-xl">
-                  <span className="font-semibold text-gray-800">{item.nama}</span>
-                  <span className="bg-rose-200/60 text-rose-900 px-2 py-0.5 rounded-md font-bold">
-                    Exp: {item.expiryDate}
-                  </span>
-                </div>
-              ))}
+              {expiringSoon.map((item) => {
+                const { label } = checkExpiryStatus(item.expiryDate);
+                return (
+                  <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-rose-50/40 rounded-xl">
+                    <span className="font-semibold text-gray-800">{item.nama}</span>
+                    <span className="bg-rose-200/60 text-rose-900 px-2 py-0.5 rounded-md font-bold">
+                      {item.expiryDate} ({label})
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <p className="text-xs text-gray-400 italic">Tidak ada bahan yang mendekati masa kadaluwarsa.</p>
@@ -248,39 +285,49 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-600">
-              {filteredTransactions.map((trx, index) => (
-                <tr key={trx.id} className="hover:bg-gray-50/50">
-                  <td className="py-3.5 px-4 font-medium text-gray-400">
-                    {index + 1}
-                  </td>
-                  <td className="py-3.5 px-4 font-medium text-gray-800">
-                    {trx.id}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
-                      trx.type === 'Online' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'
-                    }`}>
-                      {trx.type}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-gray-400">{trx.date}</td>
-                  <td className="py-3.5 px-4">{trx.customer}</td>
-                  <td className="py-3.5 px-4 font-medium text-gray-700">
-                    {trx.total}
-                  </td>
-                  <td className="py-3.5 px-4">{trx.method}</td>
-                  <td className="py-3.5 px-4">
-                    <span className="bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full text-[10px] font-semibold">
-                      {trx.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <button className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                      <Eye size={15} />
-                    </button>
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((trx, index) => (
+                  <tr key={trx.id} className="hover:bg-gray-50/50">
+                    <td className="py-3.5 px-4 font-medium text-gray-400">
+                      {index + 1}
+                    </td>
+                    <td className="py-3.5 px-4 font-medium text-gray-800">
+                      {trx.id}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
+                        trx.type === 'Online' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {trx.type}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-gray-400">{trx.date}</td>
+                    <td className="py-3.5 px-4">{trx.customer}</td>
+                    <td className="py-3.5 px-4 font-medium text-gray-700">
+                      {trx.total}
+                    </td>
+                    <td className="py-3.5 px-4">{trx.method}</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${
+                        trx.status === "Selesai" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800"
+                      }`}>
+                        {trx.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-center">
+                      <button className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                        <Eye size={15} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="py-8 text-center text-gray-400">
+                    Belum ada data transaksi yang tercatat.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
