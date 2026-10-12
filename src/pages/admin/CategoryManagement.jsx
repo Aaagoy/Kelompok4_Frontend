@@ -28,7 +28,7 @@ export default function CategoryManagement() {
       setLoading(true);
 
       const [kategoriRes] = await Promise.all([
-        api.get("/kategori/kategori"),
+        api.get("/kategori"),
         // api.get("/subkategori"),
       ]);
 

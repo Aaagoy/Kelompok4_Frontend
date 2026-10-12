@@ -1,41 +1,39 @@
-import { 
+import {
   LayoutDashboard,
-  Package, 
-  Tags, 
-  Users, 
-  LogOut, 
+  Package,
+  Tags,
+  Users,
+  LogOut,
   Store,
   Truck,
   BarChart3,
   ShoppingBag,
-  ShoppingCart
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar';
+  ShoppingCart,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate();
 
   const adminMenuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'Transaksi', icon: ShoppingCart, path: '/transaksi' }, // <-- Ditambahkan di sini
-    { name: 'Pesanan Offline', icon: ShoppingBag, path: '/offlineorders' },
-    { name: 'Produk', icon: Package, path: '/produk' },
-    { name: 'Kategori', icon: Tags, path: '/kategori' },
-    { name: 'Supplier', icon: Truck, path: '/supplier' },
-    { name: 'Laporan', icon: BarChart3, path: '/laporan' },
-    { name: 'User', icon: Users, path: '/users' },
+    { name: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
+    { name: "Transaksi", icon: ShoppingCart, path: "/transaksi" }, // <-- Ditambahkan di sini
+    { name: "Pesanan Offline", icon: ShoppingBag, path: "/offlineorders" },
+    { name: "Produk", icon: Package, path: "/produk" },
+    { name: "Kategori", icon: Tags, path: "/kategori" },
+    { name: "Supplier", icon: Truck, path: "/supplier" },
+    { name: "Laporan", icon: BarChart3, path: "/laporan" },
+    { name: "User", icon: Users, path: "/users" },
   ];
 
   return (
     <div className="flex h-screen bg-[#F5EFEA] font-sans overflow-hidden">
-      
       {/* Sidebar (Sudah responsif dengan drawer & overlay mobile) */}
       <Sidebar menuItems={adminMenuItems} brandName="Harafina" />
 
       {/* KONTEN UTAMA */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden w-full">
-        
         {/* Header Top Bar - Ditambahkan padding kiri (pl-16) khusus di mobile agar tidak menabrak tombol burger */}
         <header className="bg-white border-b border-[#EBE3D5] px-4 md:px-8 py-4 flex items-center justify-between shadow-sm shrink-0 pl-16 md:pl-8">
           <div className="flex items-center gap-3">
@@ -60,8 +58,8 @@ export default function DashboardLayout({ children }) {
               <span className="font-medium">Admin</span>
             </div>
 
-            <button 
-              onClick={() => navigate('/login')}
+            <button
+              onClick={() => navigate("/login")}
               className="flex items-center gap-2 bg-[#8D5B28] hover:bg-[#724820] text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition-colors shadow-sm cursor-pointer"
             >
               <LogOut size={14} />
