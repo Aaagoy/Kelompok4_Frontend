@@ -1,20 +1,37 @@
-import api from "./api";
+import axios from "axios";
 
-export async function Login(data) {
-  const resp = await api.post("/api/auth", data);
-  return resp.data;
-}
-// export async function LoginAdmin(data) {
-//   const resp = await api.post("/admin/login", data);
-//   return resp.data;
-// }
+const API = axios.create({
+  baseURL: "http://localhost:3000",
+});
 
-export async function getMe() {
-  const resp = await api.get("/auth/me");
-  return resp.data;
-}
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-export async function Register(data) {
-  const resp = await api.post("/auth.register", data);
-  return resp.data;
-}
+// Ambil semua user
+export const getUser = async () => {
+  const response = await API.get("/api/auth/");
+  return response.data;
+};
+
+// Tambah user / Register
+export const createUser = async (userData) => {
+  const response = await API.post("/api/auth/register", userData);
+  return response.data;
+};
+
+// Edit / Update user (Sesuaikan dengan /api/auth/account/:id)
+export const updateUser = async (id, userData) => {
+  const response = await API.patch(`/api/auth/account/${id}`, userData);
+  return response.data;
+};
+
+// Hapus user (Sesuaikan dengan /api/auth/account/:id)
+export const deleteUser = async (id) => {
+  const response = await API.delete(`/api/auth/account/${id}`);
+  return response.data;
+};

@@ -67,7 +67,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
           {/* Rute Sub-menu Laporan untuk Owner */}
           <Route path="/laporan/penjualan" element={<ReportManagement />} />
-          <Route path="/laporan/pembelian" element={<PurchaseReport />} />
+          <Route path="/expense" element={<PurchaseReport />} />
           <Route
             path="/laporan"
             element={<Navigate to="/laporan/penjualan" replace />}

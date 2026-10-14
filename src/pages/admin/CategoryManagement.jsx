@@ -8,35 +8,32 @@ import {
   X,
   FolderTree,
   Layers,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import api from "../../services/api";
 
 export default function CategoryManagement() {
-  const [
-    activeTab,
-    // setActiveTab
-  ] = useState("kategori");
+  const [activeTab] = useState("kategori");
   const [categories, setCategories] = useState([]);
-  const [
-    subCategories,
-    // ?  setSubCategories
-  ] = useState([]);
+  const [subCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // State untuk Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Jumlah data per halaman (bisa diubah sesuai kebutuhan)
 
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      const [kategoriRes] = await Promise.all([
-        api.get("/kategori"),
-        // api.get("/subkategori"),
-      ]);
+      const [kategoriRes] = await Promise.all([api.get("/kategori")]);
 
       setCategories(
         (kategoriRes.data.data ?? kategoriRes.data).map((item) => ({
           ...item,
           id: item.id_kategori ?? item.id,
-          nama: item.nama_kategori ?? item.nama_kategori,
+          nama: item.nama_kategori ?? item.nama ?? "",
           deskripsi: item.deskripsi ?? "",
         })),
       );
@@ -78,6 +75,20 @@ export default function CategoryManagement() {
     );
   });
 
+  // Logika Pemotongan Data untuk Pagination
+  const currentDataList =
+    activeTab === "kategori" ? filteredCategories : filteredSubCategories;
+  const totalPages = Math.ceil(currentDataList.length / itemsPerPage) || 1;
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = currentDataList.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Reset ke halaman 1 ketika pencarian berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   // Handle Submit Form (Tambah / Edit)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,7 +103,8 @@ export default function CategoryManagement() {
         };
 
         if (editingId) {
-          await api.put(`/kategori${editingId}`, payload);
+          // Perbaikan URL endpoint edit kategori agar memiliki garis miring "/"
+          await api.put(`/kategori/${editingId}`, payload);
         } else {
           await api.post("/kategori", payload);
         }
@@ -165,8 +177,6 @@ export default function CategoryManagement() {
     try {
       if (activeTab === "kategori") {
         await api.delete(`/kategori/${id}`);
-        // } else {
-        //   await api.delete(`/subkategori/${id}`);
       }
 
       await fetchData();
@@ -221,10 +231,7 @@ export default function CategoryManagement() {
           <span className="text-sm text-slate-500 font-medium self-end sm:self-center">
             Total:{" "}
             <strong className="text-slate-800">
-              {activeTab === "kategori"
-                ? filteredCategories.length
-                : filteredSubCategories.length}{" "}
-              data
+              {currentDataList.length} data
             </strong>
           </span>
         </div>
@@ -234,7 +241,6 @@ export default function CategoryManagement() {
           {loading ? (
             <div className="p-8 text-center text-slate-500">Memuat data...</div>
           ) : activeTab === "kategori" ? (
-            // {activeTab === "kategori" ? (
             <table className="w-full text-left text-sm">
               <thead className="bg-[#F5EFEA] text-slate-600 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
                 <tr>
@@ -245,14 +251,14 @@ export default function CategoryManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredCategories.length > 0 ? (
-                  filteredCategories.map((item, index) => (
+                {currentItems.length > 0 ? (
+                  currentItems.map((item, index) => (
                     <tr
                       key={item.id}
                       className="hover:bg-slate-50/60 transition"
                     >
                       <td className="py-4 px-6 text-slate-400 font-medium">
-                        {index + 1}
+                        {indexOfFirstItem + index + 1}
                       </td>
                       <td className="py-4 px-4 font-semibold text-slate-900 flex items-center gap-2">
                         <FolderTree size={16} className="text-[#8D5B3A]" />
@@ -302,8 +308,8 @@ export default function CategoryManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredSubCategories.length > 0 ? (
-                  filteredSubCategories.map((item, index) => {
+                {currentItems.length > 0 ? (
+                  currentItems.map((item, index) => {
                     const parentCat = categories.find(
                       (c) => c.id === Number(item.kategoriId),
                     );
@@ -313,7 +319,7 @@ export default function CategoryManagement() {
                         className="hover:bg-slate-50/60 transition"
                       >
                         <td className="py-4 px-6 text-slate-400 font-medium">
-                          {index + 1}
+                          {indexOfFirstItem + index + 1}
                         </td>
                         <td className="py-4 px-4 font-semibold text-slate-900 flex items-center gap-2">
                           <Layers size={16} className="text-[#8D5B3A]" />
@@ -359,6 +365,65 @@ export default function CategoryManagement() {
             </table>
           )}
         </div>
+
+        {/* Komponen Navigasi Pagination */}
+        {!loading && currentDataList.length > 0 && (
+          <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-xs text-slate-500">
+              Menampilkan{" "}
+              <strong className="text-slate-700">{indexOfFirstItem + 1}</strong>{" "}
+              sampai{" "}
+              <strong className="text-slate-700">
+                {Math.min(indexOfLastItem, currentDataList.length)}
+              </strong>{" "}
+              dari{" "}
+              <strong className="text-slate-700">
+                {currentDataList.length}
+              </strong>{" "}
+              data
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="p-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition"
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <div className="flex items-center gap-1 px-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-8 h-8 text-xs font-semibold rounded-xl transition ${
+                        currentPage === page
+                          ? "bg-[#8D5B3A] text-white shadow-sm"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="p-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition"
+                title="Halaman Berikutnya"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MODAL TAMBAH / EDIT KATEGORI & SUB-KATEGORI */}

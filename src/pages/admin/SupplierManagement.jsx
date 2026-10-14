@@ -12,97 +12,117 @@ import {
 } from "lucide-react";
 
 export default function SupplierManagement() {
-  const [suppliers, setSuppliers] = useState(() => {
-    const savedSuppliers = localStorage.getItem("suppliers_data");
-    if (savedSuppliers) {
-      return JSON.parse(savedSuppliers);
-    }
-    return [
-      {
-        id_supplier: 1,
-        nama_supplier: 'PT Sumber Pangan Nusantara',
-        alamat_supplier: 'Jl. Raya Industri No. 45, Jakarta',
-        notelp_supplier: '081234567890',
-      },
-      {
-        id_supplier: 2,
-        nama_supplier: 'CV Berkah Jaya Mandiri',
-        alamat_supplier: 'Jl. Ahmad Yani No. 12, Padang',
-        notelp_supplier: '085277889900',
-      }
-    ];
-  });
+  // 1. Menyimpan state data supplier dari database
+  const [suppliers, setSuppliers] = useState([]);
 
-  useEffect(() => {
-    localStorage.setItem("suppliers_data", JSON.stringify(suppliers));
-  }, [suppliers]);
-
+  // State untuk pencarian, modal, mode edit, dan form input
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
   const [formData, setFormData] = useState({
-    nama_supplier: '',
-    alamat_supplier: '',
-    notelp_supplier: '',
+    nama_supplier: "",
+    alamat_supplier: "",
+    no_telp: "",
   });
 
-  // Filter pencarian supplier
-  const filteredSuppliers = suppliers.filter(item =>
-    item.nama_supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.alamat_supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.notelp_supplier.toLowerCase().includes(searchTerm.toLowerCase())
+  // URL Endpoint Backend Database Anda (Sesuaikan dengan port/domain server Anda)
+  const API_URL = "http://localhost:3000/supplier";
+
+  // 2. Fungsi untuk mengambil (GET) data supplier dari database saat komponen pertama kali dimuat
+  const fetchSuppliers = async () => {
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+      setSuppliers(data);
+    } catch (error) {
+      console.error("Gagal mengambil data supplier:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
+
+  // 3. Filter pencarian berdasarkan input user
+  const filteredSuppliers = suppliers.filter(
+    (item) =>
+      (item.nama_supplier &&
+        item.nama_supplier.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.alamat_supplier &&
+        item.alamat_supplier
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())) ||
+      (item.no_telp &&
+        item.no_telp.toLowerCase().includes(searchTerm.toLowerCase())),
   );
 
+  // 4. Membuka modal untuk menambah data baru
   const handleOpenAddModal = () => {
     setEditingId(null);
     setFormData({
-      nama_supplier: '',
-      alamat_supplier: '',
-      notelp_supplier: '',
+      nama_supplier: "",
+      alamat_supplier: "",
+      no_telp: "",
     });
     setIsModalOpen(true);
   };
 
+  // 5. Membuka modal untuk mengedit data yang sudah ada
   const handleOpenEditModal = (supplier) => {
     setEditingId(supplier.id_supplier);
     setFormData({
-      nama_supplier: supplier.nama_supplier || '',
-      alamat_supplier: supplier.alamat_supplier || '',
-      notelp_supplier: supplier.notelp_supplier || '',
+      nama_supplier: supplier.nama_supplier || "",
+      alamat_supplier: supplier.alamat_supplier || "",
+      no_telp: supplier.no_telp || "",
     });
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  // 6. Menangani proses Simpan (Tambah baru / Update ke database)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.nama_supplier || !formData.notelp_supplier) return;
+    if (!formData.nama_supplier || !formData.no_telp) return;
 
-    if (editingId !== null) {
-      // Edit data
-      setSuppliers(
-        suppliers.map((s) =>
-          s.id_supplier === editingId
-            ? { ...s, ...formData }
-            : s
-        )
-      );
-    } else {
-      // Tambah data baru
-      const newSupplier = {
-        id_supplier: suppliers.length > 0 ? Math.max(...suppliers.map(s => s.id_supplier)) + 1 : 1,
-        ...formData,
-      };
-      setSuppliers([...suppliers, newSupplier]);
+    try {
+      if (editingId !== null) {
+        // Request PUT / PATCH ke backend untuk update data
+        await fetch(`${API_URL}/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      } else {
+        // Request POST ke backend untuk tambah data baru
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+      }
+
+      // Refresh data dari database setelah aksi berhasil
+      fetchSuppliers();
+      setIsModalOpen(false);
+      setEditingId(null);
+    } catch (error) {
+      console.error("Gagal menyimpan data supplier:", error);
     }
-
-    setIsModalOpen(false);
-    setEditingId(null);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus data supplier ini?")) {
-      setSuppliers(suppliers.filter((s) => s.id_supplier !== id));
+  // 7. Menangani proses Hapus data dari database
+  const handleDelete = async (id) => {
+    if (
+      window.confirm("Apakah Anda yakin ingin menghapus data supplier ini?")
+    ) {
+      try {
+        await fetch(`${API_URL}/${id}`, {
+          method: "DELETE",
+        });
+        // Refresh data setelah dihapus
+        fetchSuppliers();
+      } catch (error) {
+        console.error("Gagal menghapus data supplier:", error);
+      }
     }
   };
 
@@ -110,8 +130,12 @@ export default function SupplierManagement() {
     <DashboardLayout>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manajemen Supplier</h1>
-          <p className="text-sm text-slate-500 mt-1">Kelola daftar vendor, informasi kontak, dan alamat supplier barang.</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Manajemen Supplier
+          </h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Kelola daftar vendor, informasi kontak, dan alamat supplier barang.
+          </p>
         </div>
         <button
           onClick={handleOpenAddModal}
@@ -159,7 +183,10 @@ export default function SupplierManagement() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredSuppliers.length > 0 ? (
                 filteredSuppliers.map((item) => (
-                  <tr key={item.id_supplier} className="hover:bg-slate-50/60 transition">
+                  <tr
+                    key={item.id_supplier}
+                    className="hover:bg-slate-50/60 transition"
+                  >
                     <td className="py-4 px-6 font-mono text-xs font-semibold text-slate-500">
                       #{item.id_supplier}
                     </td>
@@ -171,14 +198,19 @@ export default function SupplierManagement() {
                     </td>
                     <td className="py-4 px-4 text-slate-600">
                       <div className="flex items-start gap-1.5">
-                        <MapPin size={15} className="text-slate-400 shrink-0 mt-0.5" />
-                        <span>{item.alamat_supplier || '-'}</span>
+                        <MapPin
+                          size={15}
+                          className="text-slate-400 shrink-0 mt-0.5"
+                        />
+                        <span>{item.alamat_supplier || "-"}</span>
                       </div>
                     </td>
                     <td className="py-4 px-4 text-slate-600">
                       <div className="flex items-center gap-1.5">
                         <Phone size={15} className="text-slate-400 shrink-0" />
-                        <span className="font-mono text-xs">{item.notelp_supplier || '-'}</span>
+                        <span className="font-mono text-xs">
+                          {item.no_telp || "-"}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-6 text-right">
@@ -219,7 +251,9 @@ export default function SupplierManagement() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative animate-in fade-in zoom-in duration-150">
             <div className="flex justify-between items-center mb-5">
               <h3 className="font-bold text-slate-900 text-lg">
-                {editingId !== null ? "Edit Data Supplier" : "Tambah Supplier Baru"}
+                {editingId !== null
+                  ? "Edit Data Supplier"
+                  : "Tambah Supplier Baru"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -238,7 +272,9 @@ export default function SupplierManagement() {
                   type="text"
                   placeholder="Contoh: PT Sumber Pangan"
                   value={formData.nama_supplier}
-                  onChange={(e) => setFormData({ ...formData, nama_supplier: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nama_supplier: e.target.value })
+                  }
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
                   required
                 />
@@ -251,7 +287,12 @@ export default function SupplierManagement() {
                 <textarea
                   placeholder="Masukkan alamat lengkap..."
                   value={formData.alamat_supplier}
-                  onChange={(e) => setFormData({ ...formData, alamat_supplier: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      alamat_supplier: e.target.value,
+                    })
+                  }
                   rows={3}
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
                 />
@@ -264,8 +305,10 @@ export default function SupplierManagement() {
                 <input
                   type="text"
                   placeholder="Contoh: 081234567890"
-                  value={formData.notelp_supplier}
-                  onChange={(e) => setFormData({ ...formData, notelp_supplier: e.target.value })}
+                  value={formData.no_telp}
+                  onChange={(e) =>
+                    setFormData({ ...formData, no_telp: e.target.value })
+                  }
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
                   required
                 />
