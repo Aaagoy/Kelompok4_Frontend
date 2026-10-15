@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { getExpenses, createExpense } from "../../services/expenseService";
 import { getSuppliers } from "../../services/supplierService";
+import axios from "axios";
 
 export default function PurchaseReport() {
   const [purchases, setPurchases] = useState([]);
@@ -126,9 +127,9 @@ export default function PurchaseReport() {
   const filteredPurchases = purchases.filter((item) => {
     const supplierName = item.supplier?.nama_supplier || "";
     const matchesSearch =
-      item.no_invoice.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.no_invoice?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.nama_barang.toLowerCase().includes(searchTerm.toLowerCase());
+      item.nama_barang?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDate =
       (!startDate || item.tanggal >= startDate) &&
@@ -136,6 +137,29 @@ export default function PurchaseReport() {
 
     return matchesSearch && matchesDate;
   });
+
+  const handleStatusChange = async (expenseId, newStatus) => {
+    try {
+      // Panggil API backend untuk update status di database
+      await updateExpenseStatus(expenseId, newStatus);
+
+      // Update state lokal agar tabel langsung berubah tanpa perlu refresh manual
+      setPurchases((prevPurchases) =>
+        prevPurchases.map((item) =>
+          item.id_pengeluaran === expenseId
+            ? { ...item, status: newStatus }
+            : item,
+        ),
+      );
+    } catch (err) {
+      console.error("Gagal memperbarui status:", err);
+      alert("Gagal mengubah status di database.");
+    }
+  };
+
+  const updateExpenseStatus = async (id, status) => {
+    return await axios.put(`http://localhost:3000/expense/${id}`, { status });
+  };
 
   return (
     <DashboardLayout>
@@ -264,6 +288,7 @@ export default function PurchaseReport() {
                 <th className="py-3.5 px-4">Supplier / Vendor</th>
                 <th className="py-3.5 px-4">Nama Barang</th>
                 <th className="py-3.5 px-4">Jumlah</th>
+                <th className="py-3.5 px-4">Harga</th>
                 <th className="py-3.5 px-4">Total Biaya</th>
                 <th className="py-3.5 px-6">Status</th>
               </tr>
@@ -271,7 +296,7 @@ export default function PurchaseReport() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {isLoading ? (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-500">
+                  <td colSpan="8" className="py-8 text-center text-slate-500">
                     <div className="flex justify-center items-center gap-2">
                       <Loader2 className="animate-spin" size={18} />
                       <span>Memuat data laporan dari database...</span>
@@ -281,7 +306,7 @@ export default function PurchaseReport() {
               ) : error ? (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="py-8 text-center text-rose-500 font-medium"
                   >
                     {error}
@@ -310,20 +335,42 @@ export default function PurchaseReport() {
                     <td className="py-4 px-4 text-slate-600">
                       {item.jumlah} pcs
                     </td>
+                    <td className="py-4 px-4 text-slate-600">
+                      Rp {Number(item.harga || 0).toLocaleString("id-ID")}
+                    </td>
                     <td className="py-4 px-4 font-semibold text-emerald-700">
                       Rp{" "}
-                      {Number(item.total_pengeluaran).toLocaleString("id-ID")}
+                      {Number(item.total_pengeluaran || 0).toLocaleString(
+                        "id-ID",
+                      )}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full">
-                        {item.status}
-                      </span>
+                      <select
+                        value={item.status}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            item.id_pengeluaran,
+                            e.target.value,
+                          )
+                        }
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 cursor-pointer ${
+                          item.status === "Selesai"
+                            ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                            : item.status === "Pending"
+                              ? "bg-amber-100 text-amber-800 border border-amber-200"
+                              : "bg-rose-100 text-rose-700 border border-rose-200"
+                        }`}
+                      >
+                        <option value="Selesai">Selesai</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Batal">Batal</option>
+                      </select>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="py-8 text-center text-slate-400">
+                  <td colSpan="8" className="py-8 text-center text-slate-400">
                     Tidak ada data rekapitulasi laporan pembelian yang
                     ditemukan.
                   </td>
