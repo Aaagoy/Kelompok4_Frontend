@@ -309,7 +309,7 @@ export default function OfflineOrders() {
           <table className="w-full text-left text-sm">
             <thead className="bg-[#F5EFEA] text-slate-600 font-bold uppercase text-[11px] tracking-wider border-b border-slate-100">
               <tr>
-                <th className="py-3.5 px-6">No. Antrean</th>
+                <th className="py-3.5 px-6">No. Pesanan</th>
                 <th className="py-3.5 px-4">Waktu</th>
                 <th className="py-3.5 px-4">Pelanggan Toko</th>
                 <th className="py-3.5 px-4">Rincian Item</th>

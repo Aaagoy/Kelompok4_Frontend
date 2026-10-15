@@ -8,7 +8,9 @@ import {
   Truck,
   BarChart3,
   ShoppingBag,
-  ShoppingCart,
+  // ShoppingCart,
+  // TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -18,8 +20,17 @@ export default function DashboardLayout({ children }) {
 
   const adminMenuItems = [
     { name: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
-    { name: "Transaksi", icon: ShoppingCart, path: "/transaksi" }, // <-- Ditambahkan di sini
-    { name: "Pesanan Offline", icon: ShoppingBag, path: "/offlineorders" },
+    // {
+    //   name: "Transaksi Pemasukan",
+    //   icon: TrendingUp,
+    //   path: "/transaksi/pemasukan",
+    // },
+    {
+      name: "Transaksi Pengeluaran",
+      icon: TrendingDown,
+      path: "/transaksi/pengeluaran",
+    },
+    { name: "Pesanan", icon: ShoppingBag, path: "/offlineorders" },
     { name: "Produk", icon: Package, path: "/produk" },
     { name: "Kategori", icon: Tags, path: "/kategori" },
     { name: "Supplier", icon: Truck, path: "/supplier" },
@@ -29,12 +40,12 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="flex h-screen bg-[#F5EFEA] font-sans overflow-hidden">
-      {/* Sidebar (Sudah responsif dengan drawer & overlay mobile) */}
+      {/* Sidebar */}
       <Sidebar menuItems={adminMenuItems} brandName="Harafina" />
 
       {/* KONTEN UTAMA */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden w-full">
-        {/* Header Top Bar - Ditambahkan padding kiri (pl-16) khusus di mobile agar tidak menabrak tombol burger */}
+        {/* Header Top Bar */}
         <header className="bg-white border-b border-[#EBE3D5] px-4 md:px-8 py-4 flex items-center justify-between shadow-sm shrink-0 pl-16 md:pl-8">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-[#EBE3D5] text-[#3E2723] rounded-xl hidden sm:flex">

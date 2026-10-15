@@ -14,7 +14,7 @@ import { getExpenses, createExpense } from "../../services/expenseService";
 import { getSuppliers } from "../../services/supplierService";
 import axios from "axios";
 
-export default function PurchaseReport() {
+export default function PurchaseTransaction() {
   const [purchases, setPurchases] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

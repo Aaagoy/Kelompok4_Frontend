@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown, ChevronUp, BarChart3, ShoppingCart } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
 
 const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Inisialisasi state agar langsung terbuka jika URL aktif mengandung "/laporan" atau "/transaksi"
+  // Inisialisasi state agar langsung terbuka jika URL aktif mengandung "/laporan"
   const [isReportOpen, setIsReportOpen] = useState(
-    location.pathname.includes("/laporan")
-  );
-  const [isTransactionOpen, setIsTransactionOpen] = useState(
-    location.pathname.includes("/transaksi")
+    location.pathname.includes("/laporan"),
   );
 
   return (
@@ -46,10 +43,10 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
           {/* MOBILE CLOSE BUTTON & BRAND HEADER */}
           <div className="flex items-center justify-between px-3 py-3 mb-3 border-b border-white/10">
             <div className="flex items-center gap-3 overflow-hidden">
-              <img 
-                src="/logo.jpeg" 
-                alt="Logo Harafina" 
-                className="w-9 h-9 rounded-xl object-cover border border-amber-200/20 shrink-0 shadow-sm" 
+              <img
+                src="/logo.jpeg"
+                alt="Logo Harafina"
+                className="w-9 h-9 rounded-xl object-cover border border-amber-200/20 shrink-0 shadow-sm"
               />
               <div className="flex flex-col leading-tight overflow-hidden">
                 <span className="text-xs font-bold text-white truncate">
@@ -74,60 +71,11 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
           {/* Navigasi Dinamis */}
           <nav className="space-y-1">
             {menuItems.map((item) => {
-              // Jika menu adalah Transaksi, buatkan dropdown sub-menu
-              if (item.name.toLowerCase() === "transaksi" || item.path === "/transaksi") {
-                const isTransactionActive = location.pathname.includes("/transaksi");
-
-                return (
-                  <div key="menu-transaksi">
-                    <button
-                      onClick={() => setIsTransactionOpen(!isTransactionOpen)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                        isTransactionActive
-                          ? "bg-[#8D5B28] text-white shadow-sm font-semibold"
-                          : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <ShoppingCart className="w-4 h-4 shrink-0" />
-                        <span className="truncate">Transaksi</span>
-                      </div>
-                      {isTransactionOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                    </button>
-
-                    {/* Sub-menu Dropdown Transaksi */}
-                    {isTransactionOpen && (
-                      <div className="pl-7 pr-1 py-1 space-y-1 mt-1 border-l border-white/10 ml-4">
-                        <Link
-                          to="/transaksi/penjualan"
-                          onClick={() => setIsOpen(false)}
-                          className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
-                            location.pathname === "/transaksi/penjualan"
-                              ? "bg-[#8D5B28] text-white font-semibold"
-                              : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
-                          }`}
-                        >
-                          Transaksi Penjualan
-                        </Link>
-                        <Link
-                          to="/transaksi/pembelian"
-                          onClick={() => setIsOpen(false)}
-                          className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
-                            location.pathname === "/transaksi/pembelian"
-                              ? "bg-[#8D5B28] text-white font-semibold"
-                              : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
-                          }`}
-                        >
-                          Transaksi Pembelian
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
               // Jika menu adalah Laporan, buatkan dropdown sub-menu
-              if (item.name.toLowerCase() === "laporan" || item.path === "/laporan") {
+              if (
+                item.name.toLowerCase() === "laporan" ||
+                item.path === "/laporan"
+              ) {
                 const isReportActive = location.pathname.includes("/laporan");
 
                 return (
@@ -144,7 +92,11 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                         <BarChart3 className="w-4 h-4 shrink-0" />
                         <span className="truncate">Laporan</span>
                       </div>
-                      {isReportOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                      {isReportOpen ? (
+                        <ChevronUp size={14} />
+                      ) : (
+                        <ChevronDown size={14} />
+                      )}
                     </button>
 
                     {/* Sub-menu Dropdown Laporan */}
@@ -189,6 +141,7 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                 );
               }
 
+              // Menu biasa (termasuk Transaksi Pemasukan & Transaksi Pengeluaran)
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
 
@@ -199,8 +152,8 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
-                      ? 'bg-[#8D5B28] text-white shadow-sm font-semibold'
-                      : 'text-slate-400 hover:bg-[#1a1a1a] hover:text-white'
+                      ? "bg-[#8D5B28] text-white shadow-sm font-semibold"
+                      : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
                   }`}
                 >
                   {Icon && <Icon className="w-4 h-4 shrink-0" />}
@@ -217,7 +170,9 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
             {brandName.charAt(0)}
           </div>
           <div className="overflow-hidden">
-            <p className="text-[11px] font-bold text-white truncate">{brandName}</p>
+            <p className="text-[11px] font-bold text-white truncate">
+              {brandName}
+            </p>
             <p className="text-[9px] text-slate-400 truncate">Admin</p>
           </div>
         </div>
