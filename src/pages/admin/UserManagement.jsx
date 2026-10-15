@@ -1,29 +1,21 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
-import { Plus, Search, Pencil, Trash2, User, X } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, User, X, Lock, Unlock } from "lucide-react";
 
 export default function UserManagement() {
   const [editingUser, setEditingUser] = useState(null);
-  // Ambil data dari localStorage saat pertama kali dimuat, jika kosong gunakan data default
+
+  // Ambil data dari localStorage saat pertama kali dimuat
   const [users, setUsers] = useState(() => {
     const savedUsers = localStorage.getItem("users_data");
     if (savedUsers) {
       return JSON.parse(savedUsers);
     }
     return [
-      { id: 1, name: "Admin", email: "admin@harafina.com", role: "Admin" },
-      {
-        id: 2,
-        name: "Hendra Wijaya",
-        email: "owner@harafina.com",
-        role: "Owner",
-      },
-      {
-        id: 3,
-        name: "Rudi Hartono",
-        email: "rudi@harafina.com",
-        role: "Pelanggan",
-      },
+      { id: 1, name: "Admin Utama", email: "admin@harafina.com", role: "Admin", status: "Aktif" },
+      { id: 2, name: "Hendra Wijaya", email: "owner@harafina.com", role: "Owner", status: "Aktif" },
+      { id: 3, name: "Siti Rahma", email: "kasir@harafina.com", role: "Kasir / Staf", status: "Aktif" },
+      { id: 4, name: "Rudi Hartono", email: "rudi@harafina.com", role: "Pelanggan", status: "Aktif" },
     ];
   });
 
@@ -38,7 +30,8 @@ export default function UserManagement() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "Admin",
+    role: "Kasir / Staf", // Admin dibatasi default membuat Kasir/Staf
+    status: "Aktif",
   });
 
   // Fungsi untuk menentukan warna badge berdasarkan role
@@ -48,6 +41,8 @@ export default function UserManagement() {
         return "bg-blue-100 text-blue-600";
       case "Owner":
         return "bg-purple-100 text-purple-600";
+      case "Kasir / Staf":
+        return "bg-amber-100 text-amber-700";
       case "Pelanggan":
         return "bg-emerald-100 text-emerald-600";
       default:
@@ -58,38 +53,70 @@ export default function UserManagement() {
   const filteredUsers = users.filter((u) => {
     const matchesTab = activeTab === "Semua" ? true : u.role === activeTab;
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (u.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
-  // Fungsi Buka Modal untuk Tambah Baru
+  // Fungsi Buka Modal untuk Tambah Kasir Baru
   const handleOpenAddModal = () => {
     setEditingUser(null);
-    setFormData({ name: "", email: "", role: "Admin" });
+    setFormData({ name: "", email: "", role: "Kasir / Staf", status: "Aktif" });
     setIsModalOpen(true);
   };
 
-  // Fungsi Buka Modal untuk Edit User
+  // Fungsi Buka Modal untuk Edit User (Restriksi: Admin tidak boleh edit Owner/Admin)
   const handleOpenEditModal = (user) => {
+    if (user.role === "Owner" || user.role === "Admin") {
+      alert("Akses Ditolak: Anda tidak memiliki wewenang untuk mengubah akun Owner atau Admin lain.");
+      return;
+    }
     setEditingUser(user);
-    setFormData({ name: user.name, email: user.email, role: user.role });
+    setFormData({ 
+      name: user.name, 
+      email: user.email, 
+      role: user.role, 
+      status: user.status || "Aktif" 
+    });
     setIsModalOpen(true);
   };
 
-  // Handle Submit (bisa untuk Tambah maupun Edit)
+  // Handle Submit (Tambah atau Edit Kasir)
   const handleSubmitUser = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.email) return;
 
-    setUsers([...users, { id: Date.now(), ...formData }]);
-    setFormData({ name: "", email: "", role: "Admin" });
+    if (editingUser) {
+      setUsers(
+        users.map((u) => (u.id === editingUser.id ? { ...u, ...formData } : u))
+      );
+    } else {
+      // Admin hanya bisa menambahkan Kasir/Staf baru
+      setUsers([...users, { id: Date.now(), ...formData, role: "Kasir / Staf" }]);
+    }
+
+    setFormData({ name: "", email: "", role: "Kasir / Staf", status: "Aktif" });
+    setEditingUser(null);
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus user ini?")) {
-      setUsers(users.filter((u) => u.id !== id));
+  // Fungsi Suspend / Nonaktifkan Akun Kasir yang Resign
+  const handleToggleStatus = (user) => {
+    if (user.role === "Owner" || user.role === "Admin") {
+      alert("Aksi Ditolak: Tidak dapat mengubah status akun Owner atau Admin.");
+      return;
+    }
+
+    const newStatus = user.status === "Nonaktif" ? "Aktif" : "Nonaktif";
+    const confirmMsg =
+      newStatus === "Nonaktif"
+        ? `Nonaktifkan akun kasir ${user.name}? Staf tidak akan bisa login.`
+        : `Aktifkan kembali akun kasir ${user.name}?`;
+
+    if (window.confirm(confirmMsg)) {
+      setUsers(
+        users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+      );
     }
   };
 
@@ -98,18 +125,18 @@ export default function UserManagement() {
       {/* Header Halaman */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Manajemen User</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Manajemen Staf Kasir (Admin Portal)</h2>
           <p className="text-xs text-gray-400 mt-1">
-            Kelola data pengguna, hak akses, dan status akun sistem.
+            Kelola data staf kasir, perbarui profil, dan kontrol status akses operasional harian.
           </p>
         </div>
 
         <button
           onClick={handleOpenAddModal}
-          className="flex items-center gap-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md transition-colors"
+          className="flex items-center gap-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md transition-colors cursor-pointer"
         >
           <Plus size={16} />
-          <span>Tambah User</span>
+          <span>Tambah Kasir Baru</span>
         </button>
       </div>
 
@@ -122,7 +149,7 @@ export default function UserManagement() {
           />
           <input
             type="text"
-            placeholder="Cari nama atau email..."
+            placeholder="Cari nama atau email kasir..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#8D5B3A]"
@@ -130,11 +157,11 @@ export default function UserManagement() {
         </div>
 
         <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-200 w-full md:w-auto">
-          {["Semua", "Admin", "Owner", "Pelanggan"].map((tab) => (
+          {["Semua", "Kasir / Staf", "Pelanggan"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 activeTab === tab
                   ? "bg-[#8D5B3A] text-white shadow-sm"
                   : "text-gray-500 hover:text-gray-800"
@@ -153,10 +180,11 @@ export default function UserManagement() {
             <thead className="bg-[#F5EFEA] text-gray-600 font-bold uppercase">
               <tr>
                 <th className="py-3.5 px-6">NO</th>
-                <th className="py-3.5 px-6">NAMA</th>
+                <th className="py-3.5 px-6">NAMA KASIR / STAF</th>
                 <th className="py-3.5 px-6">EMAIL</th>
                 <th className="py-3.5 px-6">ROLE</th>
-                <th className="py-3.5 px-6 text-center">AKSI</th>
+                <th className="py-3.5 px-6 text-center">STATUS AKUN</th>
+                <th className="py-3.5 px-6 text-center">AKSI OPERASIONAL</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
@@ -181,28 +209,47 @@ export default function UserManagement() {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-center">
-                      <div className="flex justify-center items-center gap-2">
-                        <button
-                          onClick={() => handleOpenEditModal(user)}
-                          className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors"
-                          title="Edit User"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="p-1.5 text-rose-500 hover:text-rose-700 transition-colors"
-                          title="Hapus User"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
+                      {user.status === "Nonaktif" ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-rose-100 text-rose-700 rounded-full">
+                          <Lock size={11} /> Nonaktif / Resign
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold bg-emerald-100 text-emerald-700 rounded-full">
+                          <Unlock size={11} /> Aktif
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-6 text-center">
+                      {user.role === "Owner" || user.role === "Admin" ? (
+                        <span className="text-[11px] text-gray-400 italic">Dilindungi Sistem</span>
+                      ) : (
+                        <div className="flex justify-center items-center gap-2">
+                          <button
+                            onClick={() => handleOpenEditModal(user)}
+                            className="p-1.5 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                            title="Edit Profil Kasir"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(user)}
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              user.status === "Nonaktif"
+                                ? "text-emerald-600 hover:bg-emerald-50"
+                                : "text-amber-600 hover:bg-amber-50"
+                            }`}
+                            title={user.status === "Nonaktif" ? "Aktifkan Kembali" : "Nonaktifkan / Suspend"}
+                          >
+                            {user.status === "Nonaktif" ? <Unlock size={15} /> : <Lock size={15} />}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="py-6 text-center text-gray-400">
+                  <td colSpan="6" className="py-6 text-center text-gray-400">
                     Tidak ada data user yang ditemukan.
                   </td>
                 </tr>
@@ -212,17 +259,17 @@ export default function UserManagement() {
         </div>
       </div>
 
-      {/* Modal Tambah / Edit User */}
+      {/* Modal Tambah / Edit Kasir */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-800 text-sm">
-                Tambah User Baru
+                {editingUser ? "Edit Profil Kasir / Staf" : "Tambah Kasir / Staf Baru"}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -230,11 +277,11 @@ export default function UserManagement() {
             <form onSubmit={handleSubmitUser} className="space-y-4 text-xs">
               <div>
                 <label className="block font-bold text-gray-600 mb-1">
-                  NAMA LENGKAP
+                  NAMA LENGKAP KASIR
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: Budi Santoso"
+                  placeholder="Contoh: Siti Rahma"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -249,7 +296,7 @@ export default function UserManagement() {
                 </label>
                 <input
                   type="email"
-                  placeholder="Contoh: budi@harafina.com"
+                  placeholder="Contoh: kasir@harafina.com"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
@@ -260,33 +307,31 @@ export default function UserManagement() {
               </div>
               <div>
                 <label className="block font-bold text-gray-600 mb-1">
-                  ROLE
+                  ROLE (HAK AKSES)
                 </label>
-                <select
-                  value={formData.role}
-                  onChange={(e) =>
-                    setFormData({ ...formData, role: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-[#8D5B3A]"
-                >
-                  <option value="Admin">Admin</option>
-                  <option value="Owner">Owner</option>
-                  <option value="Pelanggan">Pelanggan</option>
-                </select>
+                <input
+                  type="text"
+                  value="Kasir / Staf"
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-200 bg-gray-100 text-gray-500 rounded-xl font-semibold cursor-not-allowed"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  *Admin hanya berwenang mengelola staf kasir operasional. Pembuatan akun Owner/Admin baru memerlukan otorisasi Owner.
+                </p>
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors"
+                  className="px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl transition-colors cursor-pointer"
                 >
-                  {editingUser ? "Simpan Perubahan" : "Simpan User"}
+                  {editingUser ? "Simpan Perubahan" : "Simpan Kasir"}
                 </button>
               </div>
             </form>

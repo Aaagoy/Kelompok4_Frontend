@@ -6,6 +6,15 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Ambil data user aktif dari localStorage
+  const currentUserName = localStorage.getItem("userName") || brandName;
+  const rawRole = localStorage.getItem("role") || "staf";
+  // Format tampilan role agar huruf pertamanya kapital (misal: "owner" -> "Owner")
+  const currentRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
+
+  // Cek apakah halaman aktif saat ini berada di area Owner
+  const isOwnerArea = location.pathname.startsWith("/owner");
+
   // Inisialisasi state agar langsung terbuka jika URL aktif mengandung "/laporan" atau "/transaksi"
   const [isReportOpen, setIsReportOpen] = useState(
     location.pathname.includes("/laporan")
@@ -127,8 +136,13 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
               }
 
               // Jika menu adalah Laporan, buatkan dropdown sub-menu
-              if (item.name.toLowerCase() === "laporan" || item.path === "/laporan") {
+              if (item.name.toLowerCase() === "laporan" || item.path.includes("/laporan")) {
                 const isReportActive = location.pathname.includes("/laporan");
+                
+                // Tentukan prefix rute berdasarkan area (owner atau admin)
+                const salesReportPath = isOwnerArea ? "/owner/laporan/penjualan" : "/laporan/penjualan";
+                const purchaseReportPath = isOwnerArea ? "/owner/laporan/pembelian" : "/laporan/pembelian";
+                const financialReportPath = isOwnerArea ? "/owner/laporan/keuangan" : "/laporan/keuangan";
 
                 return (
                   <div key="menu-laporan">
@@ -151,10 +165,10 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                     {isReportOpen && (
                       <div className="pl-7 pr-1 py-1 space-y-1 mt-1 border-l border-white/10 ml-4">
                         <Link
-                          to="/laporan/penjualan"
+                          to={salesReportPath}
                           onClick={() => setIsOpen(false)}
                           className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
-                            location.pathname === "/laporan/penjualan"
+                            location.pathname === salesReportPath
                               ? "bg-[#8D5B28] text-white font-semibold"
                               : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
                           }`}
@@ -162,27 +176,29 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
                           Laporan Penjualan
                         </Link>
                         <Link
-                          to="/laporan/pembelian"
+                          to={purchaseReportPath}
                           onClick={() => setIsOpen(false)}
                           className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
-                            location.pathname === "/laporan/pembelian"
+                            location.pathname === purchaseReportPath
                               ? "bg-[#8D5B28] text-white font-semibold"
                               : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
                           }`}
                         >
                           Laporan Pembelian
                         </Link>
-                        <Link
-                          to="/laporan/keuangan"
-                          onClick={() => setIsOpen(false)}
-                          className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
-                            location.pathname === "/laporan/keuangan"
-                              ? "bg-[#8D5B28] text-white font-semibold"
-                              : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
-                          }`}
-                        >
-                          Laporan Keuangan
-                        </Link>
+                        {!isOwnerArea && (
+                          <Link
+                            to={financialReportPath}
+                            onClick={() => setIsOpen(false)}
+                            className={`block px-3 py-2 rounded-lg text-xs font-medium transition ${
+                              location.pathname === financialReportPath
+                                ? "bg-[#8D5B28] text-white font-semibold"
+                                : "text-slate-400 hover:bg-[#1a1a1a] hover:text-white"
+                            }`}
+                          >
+                            Laporan Keuangan
+                          </Link>
+                        )}
                       </div>
                     )}
                   </div>
@@ -211,14 +227,14 @@ const Sidebar = ({ menuItems = [], brandName = "Harafina" }) => {
           </nav>
         </div>
 
-        {/* Profile Footer */}
+        {/* Profile Footer Dinamis dari localStorage */}
         <div className="flex items-center gap-2.5 px-2.5 py-2 bg-white/5 rounded-xl mt-auto">
           <div className="w-7 h-7 rounded-full bg-[#8D5B28] text-white flex items-center justify-center text-[11px] font-bold shadow-inner shrink-0">
-            {brandName.charAt(0)}
+            {currentUserName.charAt(0)}
           </div>
           <div className="overflow-hidden">
-            <p className="text-[11px] font-bold text-white truncate">{brandName}</p>
-            <p className="text-[9px] text-slate-400 truncate">Admin</p>
+            <p className="text-[11px] font-bold text-white truncate">{currentUserName}</p>
+            <p className="text-[9px] text-slate-400 truncate">{currentRole}</p>
           </div>
         </div>
       </aside>

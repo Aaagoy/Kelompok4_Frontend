@@ -42,7 +42,7 @@ const AdminLogin = () => {
     if (userRole === "admin") {
       navigate("/dashboard"); // Dashboard utama manajemen toko
     } else if (userRole === "owner") {
-      navigate("/laporan"); // Halaman laporan keuangan & analisis owner
+      navigate("/owner/dashboard");
     } else if (userRole === "kasir") {
       navigate("/admin/pos"); // Halaman POS / Kasir Toko Bahan Kue
     }
@@ -91,7 +91,7 @@ const AdminLogin = () => {
 
           <div>
             <label className="block text-xs font-bold text-amber-200/80 uppercase tracking-wider mb-2">
-              PASSWORD AKSES
+              PASSWORD
             </label>
             <div className="relative flex items-center">
               <Lock className="w-5 h-5 absolute left-4 text-amber-300/40" />

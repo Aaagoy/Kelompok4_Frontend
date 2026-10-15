@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
-import DashboardLayout from "../../components/DashboardLayout";
 import { 
   ShoppingBag, 
   TrendingUp, 
   FileText, 
   Calendar, 
-  Search 
+  Search,
+  Printer,
+  Download
 } from "lucide-react";
+
+// Impor fungsi utilitas ekspor terpusat
+import { handleExportCSV, handleExportExcel } from "../../utils/exportUtils";
+
+// Impor Komponen Modal Preview Dokumen Cetak Pembelian Resmi
+import PrintPurchaseReport from "../../components/PrintPurchaseReport";
 
 export default function PurchaseReport() {
   // Ambil data pembelian secara real-time dari localStorage
@@ -31,6 +38,9 @@ export default function PurchaseReport() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // State untuk Mengontrol Jendela Modal Preview Cetak Pembelian
+  const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
+
   // Hitung Metrik / Statistik Laporan
   const totalPurchasesCount = purchases.length;
   const totalExpense = purchases.reduce((sum, item) => sum + Number(item.totalCost || 0), 0);
@@ -39,9 +49,9 @@ export default function PurchaseReport() {
   // Filter Data Berdasarkan Pencarian & Rentang Tanggal
   const filteredPurchases = purchases.filter((item) => {
     const matchesSearch =
-      item.invoice.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.itemsName.toLowerCase().includes(searchTerm.toLowerCase());
+      (item.invoice || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.supplier || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.itemsName || "").toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDate =
       (!startDate || item.date >= startDate) &&
@@ -51,13 +61,13 @@ export default function PurchaseReport() {
   });
 
   return (
-    <DashboardLayout>
+    <div className="w-full">
       {/* Header Halaman */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Laporan Pembelian</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Rekapitulasi total pengeluaran dan riwayat restock barang dari supplier (Read-Only).
+            Rekapitulasi total pengeluaran dan riwayat restock barang dari supplier.
           </p>
         </div>
       </div>
@@ -97,25 +107,49 @@ export default function PurchaseReport() {
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* TOOLBAR AKSI (CETAK & EKSPOR) & FILTER SEARCH */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200/85 p-4 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="relative w-full md:w-80">
-          <Search
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Cari no invoice, supplier, atau barang..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 focus:border-[#8D5B3A]"
-          />
+        
+        {/* Tombol Cetak & Ekspor File */}
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <button
+            onClick={() => setIsPrintPreviewOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#8D5B3A] hover:bg-[#6D4227] text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer"
+          >
+            <Printer size={15} /> Cetak Laporan Pembelian
+          </button>
+          <button
+            onClick={() => handleExportExcel(filteredPurchases, "Admin_Laporan_Pembelian")}
+            className="flex items-center gap-1 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
+          >
+            <Download size={14} /> Excel
+          </button>
+          <button
+            onClick={() => handleExportCSV(filteredPurchases, "Admin_Laporan_Pembelian")}
+            className="flex items-center gap-1 px-3.5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-2xs"
+          >
+            <Download size={14} /> CSV
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-sm text-slate-600">
-            <Calendar size={16} className="text-slate-400" />
+        {/* Search & Date Filter */}
+        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
+          <div className="relative w-full md:w-64">
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder="Cari invoice/supplier..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs text-slate-600 w-full md:w-auto">
+            <Calendar size={14} className="text-slate-400" />
             <input
               type="date"
               value={startDate}
@@ -133,7 +167,7 @@ export default function PurchaseReport() {
           {(startDate || endDate) && (
             <button
               onClick={() => { setStartDate(""); setEndDate(""); }}
-              className="text-xs text-rose-600 hover:underline font-medium px-2"
+              className="text-xs text-rose-600 hover:underline font-medium px-1"
             >
               Reset
             </button>
@@ -159,7 +193,7 @@ export default function PurchaseReport() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredPurchases.length > 0 ? (
                 filteredPurchases.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition">
+                  <tr key={item.id || item.invoice} className="hover:bg-slate-50/60 transition">
                     <td className="py-4 px-6 font-mono text-xs font-semibold text-slate-800">
                       {item.invoice}
                     </td>
@@ -168,11 +202,11 @@ export default function PurchaseReport() {
                     <td className="py-4 px-4 text-slate-600">{item.itemsName}</td>
                     <td className="py-4 px-4 text-slate-600">{item.qty} pcs</td>
                     <td className="py-4 px-4 font-semibold text-emerald-700">
-                      Rp {item.totalCost.toLocaleString("id-ID")}
+                      Rp {Number(item.totalCost || 0).toLocaleString("id-ID")}
                     </td>
                     <td className="py-4 px-6">
                       <span className="px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full">
-                        {item.status}
+                        {item.status || "Selesai"}
                       </span>
                     </td>
                   </tr>
@@ -188,6 +222,14 @@ export default function PurchaseReport() {
           </table>
         </div>
       </div>
-    </DashboardLayout>
+
+      {/* COMPONENT MODAL PREVIEW PRINT LAPORAN PEMBELIAN */}
+      <PrintPurchaseReport
+        isOpen={isPrintPreviewOpen}
+        onClose={() => setIsPrintPreviewOpen(false)}
+        purchases={filteredPurchases}
+        totalExpense={totalExpense}
+      />
+    </div>
   );
 }

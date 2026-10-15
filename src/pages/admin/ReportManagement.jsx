@@ -13,6 +13,10 @@ import {
   Filter
 } from "lucide-react";
 
+// Impor fungsi utilitas ekspor & komponen modal cetak resmi
+import { handleExportCSV, handleExportExcel } from "../../utils/exportUtils";
+import PrintSalesReport from "../../components/PrintSalesReport";
+
 export default function ReportManagement() {
   const [orders, setOrders] = useState(() => {
     const savedOrders = localStorage.getItem("offline_orders_data");
@@ -23,6 +27,9 @@ export default function ReportManagement() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
+
+  // State untuk mengontrol Modal Preview Cetak
+  const [isPrintPreviewOpen, setIsPrintPreviewOpen] = useState(false);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -35,21 +42,21 @@ export default function ReportManagement() {
 
   // Metrik Statistik
   const completedOrders = orders.filter(o => o.status === "Selesai");
-  const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
   const totalTransactions = orders.length;
   const averageOrderValue = completedOrders.length > 0 ? Math.round(totalRevenue / completedOrders.length) : 0;
 
-  // Filter Data Laporan sesuai Input Desain
+  // Filter Data Laporan sesuai Input
   const filteredReports = orders.filter((order) => {
     const matchSearch =
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.customerName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (order.id || "").toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchStatus = filterStatus === "Semua" || order.status === filterStatus;
 
     let matchDate = true;
     if (startDate || endDate) {
-      const orderDateOnly = order.date.split(" ")[0]; // Format 'YYYY-MM-DD'
+      const orderDateOnly = order.date ? order.date.split(" ")[0] : "";
       if (startDate && orderDateOnly < startDate) matchDate = false;
       if (endDate && orderDateOnly > endDate) matchDate = false;
     }
@@ -57,24 +64,16 @@ export default function ReportManagement() {
     return matchSearch && matchStatus && matchDate;
   });
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleExport = (format) => {
-    alert(`Berhasil mengekspor laporan ke format ${format.toUpperCase()}!`);
-  };
-
   return (
     <DashboardLayout>
-      {/* Header Halaman dengan FileText */}
+      {/* Header Halaman */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-slate-800 mb-1">
             <FileText size={24} className="text-[#8D5B3A]" />
             <h1 className="text-2xl font-bold">Laporan Penjualan</h1>
           </div>
-          <p className="text-sm text-slate-500">Laporan semua pembelian dan transaksi toko.</p>
+          <p className="text-sm text-slate-500">Laporan semua transaksi dan penjualan toko.</p>
         </div>
       </div>
 
@@ -111,10 +110,10 @@ export default function ReportManagement() {
         </div>
       </div>
 
-      {/* KARTU UTAMA LAPORAN SEPERTI GAMBAR REFERENSI */}
+      {/* KARTU UTAMA LAPORAN */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
         <h3 className="text-sm font-bold text-slate-700 mb-4 pb-2 border-b border-slate-100">
-          Laporan semua pembelian
+          Laporan semua penjualan
         </h3>
 
         {/* Panel Filter Tanggal & Status */}
@@ -162,32 +161,27 @@ export default function ReportManagement() {
           </div>
         </div>
 
-        {/* Toolbar Tombol Ekspor (PDF, Excel, CSV, Print) menggunakan Download */}
+        {/* Toolbar Tombol Ekspor & Print */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => handleExport("pdf")}
-              className="flex items-center gap-1 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs"
-            >
-              <Download size={13} /> PDF
-            </button>
-            <button
-              onClick={() => handleExport("excel")}
+              onClick={() => handleExportExcel(filteredReports, "Laporan_Penjualan")}
               className="flex items-center gap-1 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs"
             >
               <Download size={13} /> Excel
             </button>
             <button
-              onClick={() => handleExport("csv")}
+              onClick={() => handleExportCSV(filteredReports, "Laporan_Penjualan")}
               className="flex items-center gap-1 px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs"
             >
               <Download size={13} /> Csv
             </button>
+            {/* Tombol Print yang Memicu Modal Preview Standard Industri */}
             <button
-              onClick={handlePrint}
+              onClick={() => setIsPrintPreviewOpen(true)}
               className="flex items-center gap-1 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer shadow-2xs"
             >
-              <Printer size={13} /> Print
+              <Printer size={13} /> Print / Cetak Laporan
             </button>
           </div>
 
@@ -195,7 +189,7 @@ export default function ReportManagement() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Cari transaksi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20"
@@ -218,12 +212,12 @@ export default function ReportManagement() {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredReports.length > 0 ? (
                 filteredReports.map((report, index) => (
-                  <tr key={report.id} className="hover:bg-slate-50 transition">
+                  <tr key={report.id || index} className="hover:bg-slate-50 transition">
                     <td className="py-3 px-4 font-mono font-medium text-slate-500">{index + 1}</td>
                     <td className="py-3 px-4 font-semibold text-slate-800">{report.customerName}</td>
-                    <td className="py-3 px-4 text-slate-500">{report.date.split(" ")[0]}</td>
+                    <td className="py-3 px-4 text-slate-500">{report.date ? report.date.split(" ")[0] : "-"}</td>
                     <td className="py-3 px-4 font-bold text-[#8D5B3A]">
-                      Rp {report.totalAmount.toLocaleString("id-ID")}
+                      Rp {(Number(report.totalAmount) || 0).toLocaleString("id-ID")}
                     </td>
                     <td className="py-3 px-4 text-center">
                       {report.status === "Selesai" ? (
@@ -249,6 +243,16 @@ export default function ReportManagement() {
           </table>
         </div>
       </div>
+
+      {/* MODAL PREVIEW PRINT LAPORAN PENJUALAN */}
+      <PrintSalesReport
+        isOpen={isPrintPreviewOpen}
+        onClose={() => setIsPrintPreviewOpen(false)}
+        reports={filteredReports}
+        startDate={startDate}
+        endDate={endDate}
+        totalRevenue={totalRevenue}
+      />
     </DashboardLayout>
   );
 }
