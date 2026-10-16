@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }) {
       icon: TrendingDown,
       path: "/transaksi/pengeluaran",
     },
-    { name: "Pesanan", icon: ShoppingBag, path: "/offlineorders" },
+    { name: "Pesanan", icon: ShoppingBag, path: "/order" },
     { name: "Produk", icon: Package, path: "/produk" },
     { name: "Kategori", icon: Tags, path: "/kategori" },
     { name: "Supplier", icon: Truck, path: "/supplier" },

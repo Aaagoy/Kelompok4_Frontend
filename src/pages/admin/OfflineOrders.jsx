@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "../../components/DashboardLayout";
+import api from "../../services/api";
 import {
   Plus,
   Search,
@@ -10,43 +11,39 @@ import {
   Store,
   Printer,
   TrendingUp,
-  PackageCheck
+  PackageCheck,
 } from "lucide-react";
 
+// Ubah format data BE (snake_case) ke format yang dipakai tampilan
+const mapOrder = (o) => ({
+  id: o.id,
+  queueNumber: o.no_antrean,
+  customerName: o.nama_pelanggan,
+  date: o.waktu,
+  paymentMethod: o.metode_pembayaran,
+  totalAmount: Number(o.total_belanja),
+  status: o.status,
+  items: (o.items || []).map((i) => ({
+    name: i.nama_barang,
+    price: Number(i.harga),
+    qty: Number(i.qty),
+  })),
+});
+
+// Sesuai model Produk di BE: id_produk, nama_produk, harga, stok, id_kategori
+const mapProduct = (p) => ({
+  id: p.id_produk,
+  nama: p.nama_produk ?? "-",
+  harga: Number(p.harga ?? 0),
+  stok: Number(p.stok ?? 0),
+  kategori: p.kategori?.nama_kategori ?? p.kategori?.nama ?? "",
+});
+
 export default function OfflineOrders() {
-  const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem("products_data");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [orders, setOrders] = useState(() => {
-    const savedOrders = localStorage.getItem("offline_orders_data");
-    if (savedOrders) return JSON.parse(savedOrders);
-    return [
-      {
-        id: "TRX-OFF-001",
-        queueNumber: "ANT-001",
-        customerName: "Ibu Siska (Langganan Toko)",
-        date: "2026-10-09 08:15",
-        items: [
-          { productId: 1, name: "Gula Semut Organik", price: 25000, qty: 2 },
-          { productId: 2, name: "Tepung Super Brand", price: 15000, qty: 1 }
-        ],
-        totalAmount: 65000,
-        total: 65000, // Tambahkan alias 'total' agar sinkron langsung dengan Laporan Keuangan
-        paymentMethod: "Tunai",
-        status: "Selesai"
-      }
-    ];
-  });
-
-  useEffect(() => {
-    localStorage.setItem("offline_orders_data", JSON.stringify(orders));
-  }, [orders]);
-
-  useEffect(() => {
-    localStorage.setItem("products_data", JSON.stringify(products));
-  }, [products]);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,27 +55,60 @@ export default function OfflineOrders() {
   const [printModalOpen, setPrintModalOpen] = useState(false);
   const [selectedOrderForPrint, setSelectedOrderForPrint] = useState(null);
 
-  // Metrik Statistik
-  const totalOrdersToday = orders.length;
-  const activeQueueCount = orders.filter(o => o.status === "Menunggu" || o.status === "Proses").length;
-  const totalOmzetToday = orders
-    .filter(o => o.status === "Selesai")
-    .reduce((sum, o) => sum + (o.totalAmount || o.total || 0), 0);
+  // Ambil produk & pesanan dari backend
+  const fetchData = async () => {
+    try {
+      const [prodRes, orderRes] = await Promise.all([
+        api.get("/produk"),
+        api.get("/order"),
+      ]);
+      const prodList = prodRes.data?.data ?? prodRes.data;
+      setProducts(Array.isArray(prodList) ? prodList.map(mapProduct) : []);
+      setOrders((orderRes.data?.data ?? []).map(mapOrder));
+    } catch (err) {
+      alert(err, "Gagal memuat data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Metrik Statistik (khusus hari ini)
+  const todayStr = new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD
+  const todayOrders = orders.filter((o) => o.date.startsWith(todayStr));
+  const totalOrdersToday = todayOrders.length;
+  const activeQueueCount = orders.filter(
+    (o) => o.status === "Menunggu" || o.status === "Proses",
+  ).length;
+  const totalOmzetToday = todayOrders
+    .filter((o) => o.status === "Selesai")
+    .reduce((sum, o) => sum + o.totalAmount, 0);
+
+  // Tambah produk ke keranjang dari grid pilihan
   const handleAddToCart = (product) => {
     if (product.stok <= 0) {
       alert("Stok produk ini habis! Tidak dapat dipesan.");
       return;
     }
 
-    const existingIndex = cart.findIndex((item) => item.productId === product.id);
+    const existingIndex = cart.findIndex(
+      (item) => item.productId === product.id,
+    );
     if (existingIndex > -1) {
       const updatedCart = [...cart];
       if (updatedCart[existingIndex].qty < product.stok) {
-        updatedCart[existingIndex].qty += 1;
+        updatedCart[existingIndex] = {
+          ...updatedCart[existingIndex],
+          qty: updatedCart[existingIndex].qty + 1,
+        };
         setCart(updatedCart);
       } else {
-        alert(`Stok maksimal untuk ${product.nama} adalah ${product.stok} pcs.`);
+        alert(
+          `Stok maksimal untuk ${product.nama} adalah ${product.stok} pcs.`,
+        );
       }
     } else {
       setCart([
@@ -88,12 +118,13 @@ export default function OfflineOrders() {
           name: product.nama,
           price: product.harga,
           qty: 1,
-          maxStock: product.stok
-        }
+          maxStock: product.stok,
+        },
       ]);
     }
   };
 
+  // Ubah jumlah item di keranjang
   const handleUpdateQty = (productId, delta) => {
     setCart(
       cart
@@ -108,15 +139,15 @@ export default function OfflineOrders() {
           }
           return item;
         })
-        .filter((item) => item.qty > 0)
+        .filter((item) => item.qty > 0),
     );
   };
 
-  const calculateCartTotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  };
+  const calculateCartTotal = () =>
+    cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  const handleCheckoutOrder = (e) => {
+  // Simpan Pesanan Baru -> POST ke backend
+  const handleCheckoutOrder = async (e) => {
     e.preventDefault();
     if (cart.length === 0) {
       alert("Keranjang pesanan masih kosong!");
@@ -127,92 +158,65 @@ export default function OfflineOrders() {
       return;
     }
 
-    const queueCount = orders.length + 1;
-    const formattedQueue = `ANT-${String(queueCount).padStart(3, "0")}`;
-    const total = calculateCartTotal();
-
-    const newOrder = {
-      id: `TRX-OFF-${Date.now().toString().slice(-4)}`,
-      invoice: `TRX-OFF-${Date.now().toString().slice(-4)}`, // Ditambahkan properti invoice agar sinkron
-      queueNumber: formattedQueue,
-      customerName: customerName,
-      date: new Date().toISOString().replace("T", " ").slice(0, 16),
-      items: [...cart],
-      totalAmount: total,
-      total: total, // Disamakan agar terbaca oleh modul Laporan Keuangan
-      paymentMethod: paymentMethod,
-      status: orderStatus
-    };
-
-    if (orderStatus === "Selesai") {
-      const updatedProducts = products.map((prod) => {
-        const cartItem = cart.find((item) => item.productId === prod.id);
-        if (cartItem) {
-          return {
-            ...prod,
-            stok: Math.max(0, prod.stok - cartItem.qty)
-          };
-        }
-        return prod;
+    setSubmitting(true);
+    try {
+      const { data: newOrder } = await api.post("/order", {
+        nama_pelanggan: customerName,
+        metode_pembayaran: paymentMethod,
+        status: orderStatus,
+        items: cart.map((i) => ({
+          id_produk: i.productId,
+          qty: i.qty,
+        })),
       });
-      setProducts(updatedProducts);
-    }
 
-    setOrders([newOrder, ...orders]);
-    setIsModalOpen(false);
-    setCustomerName("");
-    setCart([]);
-    setPaymentMethod("Tunai");
-    setOrderStatus("Menunggu");
+      await fetchData(); // refresh daftar pesanan & stok terbaru
 
-    setSelectedOrderForPrint(newOrder);
-    setPrintModalOpen(true);
-  };
+      setIsModalOpen(false);
+      setCustomerName("");
+      setCart([]);
+      setPaymentMethod("Tunai");
+      setOrderStatus("Menunggu");
 
-  const handleStatusChange = (orderId, newStatus) => {
-    const targetOrder = orders.find(o => o.id === orderId);
-    if (!targetOrder) return;
-
-    const oldStatus = targetOrder.status;
-    if (oldStatus === newStatus) return;
-
-    let updatedProducts = [...products];
-
-    if (oldStatus !== "Selesai" && newStatus === "Selesai") {
-      updatedProducts = products.map((prod) => {
-        const matchItem = targetOrder.items.find(i => i.productId === prod.id);
-        if (matchItem) {
-          return { ...prod, stok: Math.max(0, prod.stok - matchItem.qty) };
-        }
-        return prod;
-      });
-    } else if (oldStatus === "Selesai" && (newStatus === "Proses" || newStatus === "Menunggu")) {
-      updatedProducts = products.map((prod) => {
-        const matchItem = targetOrder.items.find(i => i.productId === prod.id);
-        if (matchItem) {
-          return { ...prod, stok: prod.stok + matchItem.qty };
-        }
-        return prod;
-      });
-    }
-
-    setProducts(updatedProducts);
-
-    const updatedOrders = orders.map((o) =>
-      o.id === orderId ? { ...o, status: newStatus } : o
-    );
-    setOrders(updatedOrders);
-
-    if (newStatus === "Selesai") {
-      const completedOrder = updatedOrders.find(o => o.id === orderId);
-      setSelectedOrderForPrint(completedOrder);
+      setSelectedOrderForPrint(mapOrder(newOrder.data));
       setPrintModalOpen(true);
+    } catch (err) {
+      alert(err, "Gagal menyimpan pesanan");
+      fetchData(); // stok mungkin berubah, sinkronkan ulang
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDeleteOrder = (orderId) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus catatan pesanan ini?")) {
-      setOrders(orders.filter((o) => o.id !== orderId));
+  // Ubah status pesanan -> PATCH ke backend (stok diurus di backend)
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      const { data: updatedOrder } = await api.patch(
+        `/order/${orderId}/status`,
+        { status: newStatus },
+      );
+      await fetchData();
+
+      if (newStatus === "Selesai") {
+        setSelectedOrderForPrint(mapOrder(updatedOrder.data));
+        setPrintModalOpen(true);
+      }
+    } catch (err) {
+      alert(err, "Gagal mengubah status");
+      fetchData();
+    }
+  };
+
+  const handleDeleteOrder = async (orderId) => {
+    if (
+      !window.confirm("Apakah Anda yakin ingin menghapus catatan pesanan ini?")
+    )
+      return;
+    try {
+      await api.delete(`/order/${orderId}`);
+      await fetchData();
+    } catch (err) {
+      alert(err, "Gagal menghapus pesanan");
     }
   };
 
@@ -227,9 +231,9 @@ export default function OfflineOrders() {
 
   const filteredOrders = orders.filter(
     (o) =>
-      o.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(o.id).includes(searchTerm) ||
       o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.queueNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      o.queueNumber.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -239,10 +243,13 @@ export default function OfflineOrders() {
         <div>
           <div className="flex items-center gap-2 text-[#8D5B3A] mb-1">
             <Store size={24} />
-            <h1 className="text-2xl font-bold text-slate-900">Pesanan Offline & Antrean Toko</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              Pesanan Offline & Antrean Toko
+            </h1>
           </div>
           <p className="text-sm text-slate-500">
-            Kelola nomor antrean, penyiapan barang dari gudang, dan kasir toko fisik Harafina.
+            Kelola nomor antrean, penyiapan barang dari gudang, dan kasir toko
+            fisik Harafina.
           </p>
         </div>
         <button
@@ -261,8 +268,12 @@ export default function OfflineOrders() {
             <Clock size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-400 font-medium">Antrean Aktif (Menunggu / Proses)</p>
-            <p className="text-xl font-bold text-slate-900">{activeQueueCount} Pelanggan</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Antrean Aktif (Menunggu / Proses)
+            </p>
+            <p className="text-xl font-bold text-slate-900">
+              {activeQueueCount} Pelanggan
+            </p>
           </div>
         </div>
 
@@ -271,8 +282,12 @@ export default function OfflineOrders() {
             <PackageCheck size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-400 font-medium">Total Pesanan Hari Ini</p>
-            <p className="text-xl font-bold text-slate-900">{totalOrdersToday} Transaksi</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Total Pesanan Hari Ini
+            </p>
+            <p className="text-xl font-bold text-slate-900">
+              {totalOrdersToday} Transaksi
+            </p>
           </div>
         </div>
 
@@ -281,8 +296,12 @@ export default function OfflineOrders() {
             <TrendingUp size={22} />
           </div>
           <div>
-            <p className="text-xs text-slate-400 font-medium">Omzet Toko Fisik Hari Ini</p>
-            <p className="text-xl font-bold text-emerald-700">Rp {totalOmzetToday.toLocaleString("id-ID")}</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Omzet Toko Fisik Hari Ini
+            </p>
+            <p className="text-xl font-bold text-emerald-700">
+              Rp {totalOmzetToday.toLocaleString("id-ID")}
+            </p>
           </div>
         </div>
       </div>
@@ -291,7 +310,10 @@ export default function OfflineOrders() {
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="relative w-full sm:w-96">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
             <input
               type="text"
               placeholder="Cari No. Antrean, ID, atau Nama Pelanggan..."
@@ -301,7 +323,10 @@ export default function OfflineOrders() {
             />
           </div>
           <span className="text-sm text-slate-500 font-medium">
-            Total Data: <strong className="text-slate-800">{filteredOrders.length} Antrean</strong>
+            Total Data:{" "}
+            <strong className="text-slate-800">
+              {filteredOrders.length} Antrean
+            </strong>
           </span>
         </div>
 
@@ -320,27 +345,41 @@ export default function OfflineOrders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {filteredOrders.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="py-8 text-center text-slate-400">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : filteredOrders.length > 0 ? (
                 filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50/60 transition">
+                  <tr
+                    key={order.id}
+                    className="hover:bg-slate-50/60 transition"
+                  >
                     <td className="py-4 px-6">
                       <span className="px-3 py-1 font-mono font-extrabold text-[#8D5B3A] bg-[#8D5B3A]/10 rounded-lg">
-                        {order.queueNumber || "ANT-001"}
+                        {order.queueNumber}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-xs text-slate-500">{order.date}</td>
-                    <td className="py-4 px-4 font-medium text-slate-800">{order.customerName}</td>
+                    <td className="py-4 px-4 text-xs text-slate-500">
+                      {order.date}
+                    </td>
+                    <td className="py-4 px-4 font-medium text-slate-800">
+                      {order.customerName}
+                    </td>
                     <td className="py-4 px-4">
                       <div className="text-xs space-y-0.5 max-w-xs">
                         {order.items.map((item, idx) => (
                           <div key={idx} className="text-slate-600 truncate">
-                            • {item.name} <span className="font-semibold">({item.qty}x)</span>
+                            • {item.name}{" "}
+                            <span className="font-semibold">({item.qty}x)</span>
                           </div>
                         ))}
                       </div>
                     </td>
                     <td className="py-4 px-4 font-bold text-[#8D5B3A]">
-                      Rp {(order.totalAmount || order.total).toLocaleString("id-ID")}
+                      Rp {order.totalAmount.toLocaleString("id-ID")}
                     </td>
                     <td className="py-4 px-4">
                       <span className="px-2.5 py-1 text-xs font-semibold bg-slate-100 text-slate-700 rounded-lg">
@@ -350,13 +389,15 @@ export default function OfflineOrders() {
                     <td className="py-4 px-4">
                       <select
                         value={order.status}
-                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                        onChange={(e) =>
+                          handleStatusChange(order.id, e.target.value)
+                        }
                         className={`px-3 py-1.5 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#8D5B3A]/20 cursor-pointer ${
                           order.status === "Selesai"
                             ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                             : order.status === "Proses"
-                            ? "bg-blue-100 text-blue-700 border border-blue-200"
-                            : "bg-amber-100 text-amber-800 border border-amber-200"
+                              ? "bg-blue-100 text-blue-700 border border-blue-200"
+                              : "bg-amber-100 text-amber-800 border border-amber-200"
                         }`}
                       >
                         <option value="Menunggu">Menunggu</option>
@@ -403,7 +444,9 @@ export default function OfflineOrders() {
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="text-[#8D5B3A]" size={20} />
-                <h3 className="font-bold text-slate-900 text-lg">Buat Pesanan Baru & Ambil Nomor Antrean</h3>
+                <h3 className="font-bold text-slate-900 text-lg">
+                  Buat Pesanan Baru & Ambil Nomor Antrean
+                </h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -468,17 +511,25 @@ export default function OfflineOrders() {
                       key={p.id}
                       onClick={() => handleAddToCart(p)}
                       className={`p-3 bg-white rounded-xl border cursor-pointer transition hover:border-[#8D5B3A] shadow-2xs flex flex-col justify-between ${
-                        p.stok <= 0 ? "opacity-50 bg-slate-100 cursor-not-allowed" : ""
+                        p.stok <= 0
+                          ? "opacity-50 bg-slate-100 cursor-not-allowed"
+                          : ""
                       }`}
                     >
                       <div>
-                        <p className="font-semibold text-xs text-slate-800 line-clamp-1">{p.nama}</p>
+                        <p className="font-semibold text-xs text-slate-800 line-clamp-1">
+                          {p.nama}
+                        </p>
                         <p className="text-[11px] text-[#8D5B3A] font-bold mt-0.5">
                           Rp {p.harga.toLocaleString("id-ID")}
                         </p>
                       </div>
                       <div className="flex justify-between items-center mt-2 text-[10px]">
-                        <span className={`font-semibold ${p.stok > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                        <span
+                          className={`font-semibold ${
+                            p.stok > 0 ? "text-emerald-600" : "text-rose-600"
+                          }`}
+                        >
                           Stok: {p.stok}
                         </span>
                         <span className="text-slate-400">{p.kategori}</span>
@@ -506,22 +557,35 @@ export default function OfflineOrders() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {cart.map((item) => (
-                          <tr key={item.productId} className="hover:bg-slate-50">
-                            <td className="py-2.5 px-3 font-semibold text-slate-800">{item.name}</td>
-                            <td className="py-2.5 px-3">Rp {item.price.toLocaleString("id-ID")}</td>
+                          <tr
+                            key={item.productId}
+                            className="hover:bg-slate-50"
+                          >
+                            <td className="py-2.5 px-3 font-semibold text-slate-800">
+                              {item.name}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              Rp {item.price.toLocaleString("id-ID")}
+                            </td>
                             <td className="py-2.5 px-3 text-center">
                               <div className="inline-flex items-center gap-2 border border-slate-200 rounded-xl px-2 py-0.5 bg-white">
                                 <button
                                   type="button"
-                                  onClick={() => handleUpdateQty(item.productId, -1)}
+                                  onClick={() =>
+                                    handleUpdateQty(item.productId, -1)
+                                  }
                                   className="text-slate-500 font-bold hover:text-slate-800"
                                 >
                                   -
                                 </button>
-                                <span className="font-bold w-4 text-center">{item.qty}</span>
+                                <span className="font-bold w-4 text-center">
+                                  {item.qty}
+                                </span>
                                 <button
                                   type="button"
-                                  onClick={() => handleUpdateQty(item.productId, 1)}
+                                  onClick={() =>
+                                    handleUpdateQty(item.productId, 1)
+                                  }
                                   className="text-slate-500 font-bold hover:text-slate-800"
                                 >
                                   +
@@ -529,12 +593,15 @@ export default function OfflineOrders() {
                               </div>
                             </td>
                             <td className="py-2.5 px-3 text-right font-semibold text-slate-900">
-                              Rp {(item.price * item.qty).toLocaleString("id-ID")}
+                              Rp{" "}
+                              {(item.price * item.qty).toLocaleString("id-ID")}
                             </td>
                             <td className="py-2.5 px-3 text-center">
                               <button
                                 type="button"
-                                onClick={() => handleUpdateQty(item.productId, -item.qty)}
+                                onClick={() =>
+                                  handleUpdateQty(item.productId, -item.qty)
+                                }
                                 className="text-rose-600 hover:text-rose-800 font-medium"
                               >
                                 Hapus
@@ -545,7 +612,9 @@ export default function OfflineOrders() {
                       </tbody>
                     </table>
                     <div className="bg-[#F5EFEA] p-3.5 flex justify-between items-center border-t border-slate-200">
-                      <span className="font-bold text-slate-700 text-sm">Total Pembayaran:</span>
+                      <span className="font-bold text-slate-700 text-sm">
+                        Total Pembayaran:
+                      </span>
                       <span className="font-extrabold text-[#8D5B3A] text-lg">
                         Rp {calculateCartTotal().toLocaleString("id-ID")}
                       </span>
@@ -553,7 +622,8 @@ export default function OfflineOrders() {
                   </div>
                 ) : (
                   <div className="p-6 border border-dashed border-slate-200 rounded-xl text-center text-slate-400 text-xs">
-                    Belum ada produk yang dipilih. Silakan klik produk di atas untuk memasukkannya ke keranjang.
+                    Belum ada produk yang dipilih. Silakan klik produk di atas
+                    untuk memasukkannya ke keranjang.
                   </div>
                 )}
               </div>
@@ -568,9 +638,12 @@ export default function OfflineOrders() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#8D5B3A] hover:bg-[#6D4227] rounded-xl shadow-sm transition cursor-pointer"
+                  disabled={submitting}
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-[#8D5B3A] hover:bg-[#6D4227] rounded-xl shadow-sm transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Simpan Pesanan & Ambil Antrean
+                  {submitting
+                    ? "Menyimpan..."
+                    : "Simpan Pesanan & Ambil Antrean"}
                 </button>
               </div>
             </form>
@@ -584,7 +657,8 @@ export default function OfflineOrders() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
               <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                <Printer size={18} className="text-[#8D5B3A]" /> Preview Struk & Nomor Antrean
+                <Printer size={18} className="text-[#8D5B3A]" /> Preview Struk &
+                Nomor Antrean
               </h3>
               <button
                 onClick={() => setPrintModalOpen(false)}
@@ -595,12 +669,18 @@ export default function OfflineOrders() {
             </div>
 
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs space-y-2 mb-6">
-              <div className="text-center font-bold text-sm text-slate-900">TOKO BAHAN KUE HARAFINA</div>
-              <div className="text-center text-[10px] text-slate-500">Jl. Toko Fisik No. 45, Padang</div>
+              <div className="text-center font-bold text-sm text-slate-900">
+                TOKO BAHAN KUE HARAFINA
+              </div>
+              <div className="text-center text-[10px] text-slate-500">
+                Jl. Toko Fisik No. 45, Padang
+              </div>
               <div className="border-t border-dashed border-slate-300 my-2"></div>
               <div className="flex justify-between">
                 <span>No. Antrean:</span>
-                <span className="font-bold text-sm text-[#8D5B3A]">{selectedOrderForPrint.queueNumber}</span>
+                <span className="font-bold text-sm text-[#8D5B3A]">
+                  {selectedOrderForPrint.queueNumber}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Waktu:</span>
@@ -608,21 +688,32 @@ export default function OfflineOrders() {
               </div>
               <div className="flex justify-between">
                 <span>Pelanggan:</span>
-                <span className="font-bold">{selectedOrderForPrint.customerName}</span>
+                <span className="font-bold">
+                  {selectedOrderForPrint.customerName}
+                </span>
               </div>
               <div className="border-t border-dashed border-slate-300 my-2"></div>
               <div className="space-y-1">
                 {selectedOrderForPrint.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-slate-700">
-                    <span>{item.name} ({item.qty}x)</span>
-                    <span>Rp {(item.price * item.qty).toLocaleString("id-ID")}</span>
+                  <div
+                    key={idx}
+                    className="flex justify-between text-slate-700"
+                  >
+                    <span>
+                      {item.name} ({item.qty}x)
+                    </span>
+                    <span>
+                      Rp {(item.price * item.qty).toLocaleString("id-ID")}
+                    </span>
                   </div>
                 ))}
               </div>
               <div className="border-t border-dashed border-slate-300 my-2"></div>
               <div className="flex justify-between font-bold text-slate-900 text-sm">
                 <span>TOTAL:</span>
-                <span className="text-[#8D5B3A]">Rp {(selectedOrderForPrint.totalAmount || selectedOrderForPrint.total).toLocaleString("id-ID")}</span>
+                <span className="text-[#8D5B3A]">
+                  Rp {selectedOrderForPrint.totalAmount.toLocaleString("id-ID")}
+                </span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Pembayaran:</span>
@@ -630,7 +721,9 @@ export default function OfflineOrders() {
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Status:</span>
-                <span className="font-semibold">{selectedOrderForPrint.status}</span>
+                <span className="font-semibold">
+                  {selectedOrderForPrint.status}
+                </span>
               </div>
             </div>
 

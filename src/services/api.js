@@ -28,4 +28,9 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+export const getErrorMessage = (err, fallback = "Terjadi kesalahan") =>
+  err.response?.data?.message ||
+  (err.request ? "Server tidak dapat dihubungi" : fallback);
+
 export default api;
